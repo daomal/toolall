@@ -1,4 +1,4 @@
-import { FileText, Image, Type, QrCode, Palette, FileImage, Merge, Scissors, ArrowUpDown, PenTool, Droplets, Edit3, FileSpreadsheet, User, RefreshCw, Compass as Compress, Clock, CreditCard, Calculator, Mail, RotateCcw, Shield, Hash, Crop, DollarSign, Percent, Receipt, PiggyBank, Landmark, FileCheck, BookOpen, Ruler, Users, TrendingUp, Zap, Camera, Palette as PaletteIcon, Calendar, FileText as FileTextIcon, CalendarClock, Clock as ClockIcon, BookOpen as BookOpenIcon, RotateCw, Tag, Lock, Thermometer, Utensils } from 'lucide-react';
+import { FileText, Image, Type, QrCode, Palette, FileImage, Merge, ArrowUpDown, PenTool, Droplets, Edit3, FileSpreadsheet, User, RefreshCw, Compass as Compress, Clock, CreditCard, Calculator, Mail, RotateCcw, Shield, Hash, Crop, DollarSign, Percent, Receipt, PiggyBank, Landmark, FileCheck, BookOpen, Ruler, Users, TrendingUp, Zap, Camera, Palette as PaletteIcon, Calendar, FileText as FileTextIcon, CalendarClock, Clock as ClockIcon, BookOpen as BookOpenIcon, RotateCw, Tag, Lock, Thermometer, Utensils } from 'lucide-react';
 
 export interface Tool {
   id: string;
@@ -20,20 +20,12 @@ export const tools: Tool[] = [
     path: '/pdf-merger'
   },
   {
-    id: 'pdf-splitter',
-    title: 'Pemisah PDF (PDF Splitter)',
-    description: 'Pisahkan halaman dari file PDF sesuai kebutuhan Anda.',
-    icon: Scissors,
-    category: 'Dokumen & PDF',
-    path: '/pdf-splitter'
-  },
-  {
-    id: 'pdf-reorder',
-    title: 'Urutkan Ulang Halaman PDF',
-    description: 'Ubah urutan halaman dalam sebuah dokumen PDF.',
+    id: 'pdf-organizer',
+    title: 'Pengatur PDF (Organize PDF)',
+    description: 'Ubah urutan, putar, dan hapus halaman dalam PDF Anda.',
     icon: ArrowUpDown,
     category: 'Dokumen & PDF',
-    path: '/pdf-reorder'
+    path: '/pdf-organizer'
   },
   {
     id: 'jpg-to-pdf',
@@ -84,14 +76,6 @@ export const tools: Tool[] = [
     path: '/cv-builder'
   },
   {
-    id: 'pdf-organizer',
-    title: 'Pengatur PDF (Organize PDF)',
-    description: 'Ubah urutan, putar, dan hapus halaman dalam PDF Anda.',
-    icon: ArrowUpDown,
-    category: 'Dokumen & PDF',
-    path: '/pdf-organizer'
-  },
-  {
     id: 'pdf-page-numbers',
     title: 'Penambah Nomor Halaman PDF',
     description: 'Beri nomor halaman secara otomatis pada dokumen PDF Anda.',
@@ -132,14 +116,6 @@ export const tools: Tool[] = [
     icon: RefreshCw,
     category: 'Gambar & Grafis',
     path: '/image-converter'
-  },
-  {
-    id: 'image-compressor',
-    title: 'Kompresor Gambar',
-    description: 'Kurangi ukuran file gambar tanpa merusak kualitas.',
-    icon: Compress,
-    category: 'Gambar & Grafis',
-    path: '/image-compressor'
   },
   {
     id: 'unit-converter',

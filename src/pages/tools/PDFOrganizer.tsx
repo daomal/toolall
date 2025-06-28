@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ArrowLeft, ArrowUpDown, ArrowRight, ArrowLeft as ArrowLeftIcon, Upload, Download, RotateCw, RotateCcw, Trash2, Eye, X, GripVertical } from 'lucide-react';
+import { ArrowLeft, ArrowUpDown, ArrowRight, ArrowLeftIcon, Upload, Download, RotateCw, RotateCcw, Trash2, Eye, X, GripVertical } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { PDFDocument, degrees } from 'pdf-lib';
 import { saveAs } from 'file-saver';

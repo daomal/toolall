@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Utensils, Calculator, Activity, Info, RefreshCw, Plus, Trash2, Search } from 'lucide-react';
+import { ArrowLeft, Utensils, Calculator, Activity, Info, RefreshCw, Plus, Trash2, Search, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface CalorieResult {
@@ -46,7 +46,22 @@ const foodDatabase: FoodItem[] = [
   { id: '12', name: 'Wortel', calories: 41, protein: 0.9, carbs: 9.6, fat: 0.2, quantity: 100, unit: 'gram' },
   { id: '13', name: 'Brokoli', calories: 34, protein: 2.8, carbs: 6.6, fat: 0.4, quantity: 100, unit: 'gram' },
   { id: '14', name: 'Kacang Tanah', calories: 567, protein: 25.8, carbs: 16.1, fat: 49.2, quantity: 100, unit: 'gram' },
-  { id: '15', name: 'Alpukat', calories: 160, protein: 2, carbs: 8.5, fat: 14.7, quantity: 100, unit: 'gram' }
+  { id: '15', name: 'Alpukat', calories: 160, protein: 2, carbs: 8.5, fat: 14.7, quantity: 100, unit: 'gram' },
+  { id: '16', name: 'Nasi Goreng', calories: 267, protein: 5.2, carbs: 42.1, fat: 8.7, quantity: 100, unit: 'gram' },
+  { id: '17', name: 'Mie Goreng', calories: 321, protein: 7.8, carbs: 48.3, fat: 11.2, quantity: 100, unit: 'gram' },
+  { id: '18', name: 'Sate Ayam', calories: 227, protein: 27.3, carbs: 1.2, fat: 13.2, quantity: 100, unit: 'gram' },
+  { id: '19', name: 'Gado-gado', calories: 153, protein: 6.6, carbs: 11.2, fat: 9.1, quantity: 100, unit: 'gram' },
+  { id: '20', name: 'Rendang', calories: 349, protein: 22.6, carbs: 7.8, fat: 25.3, quantity: 100, unit: 'gram' },
+  { id: '21', name: 'Soto Ayam', calories: 103, protein: 8.3, carbs: 7.4, fat: 4.2, quantity: 100, unit: 'gram' },
+  { id: '22', name: 'Bakso', calories: 218, protein: 14.5, carbs: 12.3, fat: 12.6, quantity: 100, unit: 'gram' },
+  { id: '23', name: 'Martabak Manis', calories: 389, protein: 7.2, carbs: 52.1, fat: 17.3, quantity: 100, unit: 'gram' },
+  { id: '24', name: 'Bubur Ayam', calories: 142, protein: 6.8, carbs: 22.5, fat: 2.9, quantity: 100, unit: 'gram' },
+  { id: '25', name: 'Siomay', calories: 168, protein: 10.2, carbs: 18.7, fat: 6.3, quantity: 100, unit: 'gram' },
+  { id: '26', name: 'Batagor', calories: 215, protein: 12.7, carbs: 16.8, fat: 11.2, quantity: 100, unit: 'gram' },
+  { id: '27', name: 'Ketoprak', calories: 157, protein: 8.3, carbs: 19.6, fat: 5.7, quantity: 100, unit: 'gram' },
+  { id: '28', name: 'Lontong Sayur', calories: 133, protein: 3.6, carbs: 23.5, fat: 3.2, quantity: 100, unit: 'gram' },
+  { id: '29', name: 'Nasi Uduk', calories: 185, protein: 3.2, carbs: 32.7, fat: 4.8, quantity: 100, unit: 'gram' },
+  { id: '30', name: 'Soto Betawi', calories: 211, protein: 10.3, carbs: 8.7, fat: 15.6, quantity: 100, unit: 'gram' }
 ];
 
 const CalorieCalculator: React.FC = () => {
@@ -62,7 +77,7 @@ const CalorieCalculator: React.FC = () => {
   // Result state
   const [result, setResult] = useState<CalorieResult | null>(null);
   const [showResult, setShowResult] = useState<boolean>(false);
-  const [error, setError] = useState<string>('');
+  const [error, setError] = useState<string | null>(null);
   
   // Food tracking state
   const [consumedFoods, setConsumedFoods] = useState<FoodItem[]>([]);
@@ -127,7 +142,7 @@ const CalorieCalculator: React.FC = () => {
       return;
     }
 
-    setError('');
+    setError(null);
 
     // Calculate BMR
     const bmr = calculateBMR(gender, weight, height, age);
@@ -213,7 +228,7 @@ const CalorieCalculator: React.FC = () => {
     setGoal('maintain');
     setResult(null);
     setShowResult(false);
-    setError('');
+    setError(null);
     setConsumedFoods([]);
     setTotalConsumedCalories(0);
     setRemainingCalories(0);

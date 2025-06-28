@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { PDFDocument } from 'pdf-lib';
 import { saveAs } from 'file-saver';
 import { Document, Page, pdfjs } from 'react-pdf';
+import * as pdfEncrypt from 'pdf-encrypt-js';
 
 // Initialize pdfjs worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
@@ -132,34 +133,28 @@ const PDFProtect: React.FC = () => {
     setSuccessMessage(null);
     
     try {
-      // Load PDF
+      // Read the PDF file
       const pdfBytes = await pdfFile.arrayBuffer();
-      const pdfDoc = await PDFDocument.load(pdfBytes);
       
-      // Set protection
-      const userPassword = options.userPassword;
-      const ownerPassword = options.ownerPassword || options.userPassword;
+      // Use pdf-encrypt-js library to encrypt the PDF
+      const encryptedPdfBytes = await pdfEncrypt.encrypt(
+        new Uint8Array(pdfBytes),
+        {
+          userPassword: options.userPassword,
+          ownerPassword: options.ownerPassword || options.userPassword,
+          permissions: {
+            printing: options.canPrint ? 'highResolution' : 'none',
+            modifying: options.canModify,
+            copying: options.canCopy,
+            annotating: options.canAnnotate,
+            fillingForms: options.canAnnotate,
+            contentAccessibility: true,
+            documentAssembly: options.canModify,
+          }
+        }
+      );
       
-      // Set permissions
-      const permissions = {
-        printing: options.canPrint ? 'highResolution' : 'none',
-        modifying: options.canModify,
-        copying: options.canCopy,
-        annotating: options.canAnnotate,
-        fillingForms: options.canAnnotate,
-        contentAccessibility: true,
-        documentAssembly: options.canModify,
-      };
-      
-      // Encrypt the PDF
-      pdfDoc.encrypt({
-        userPassword,
-        ownerPassword,
-        permissions,
-      });
-      
-      // Save the encrypted PDF
-      const encryptedPdfBytes = await pdfDoc.save();
+      // Create a blob from the encrypted PDF
       const blob = new Blob([encryptedPdfBytes], { type: 'application/pdf' });
       
       // Generate a filename
@@ -167,6 +162,7 @@ const PDFProtect: React.FC = () => {
       const baseName = originalName.substring(0, originalName.lastIndexOf('.')) || originalName;
       const newFileName = `${baseName}-protected.pdf`;
       
+      // Save the file
       saveAs(blob, newFileName);
       setSuccessMessage(`PDF berhasil dienkripsi dan disimpan sebagai "${newFileName}"`);
       

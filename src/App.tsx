@@ -6,7 +6,6 @@ import HomePage from './pages/HomePage';
 
 // Import all tool pages
 import PDFMerger from './pages/tools/PDFMerger';
-import PDFSplitter from './pages/tools/PDFSplitter';
 import PDFReorder from './pages/tools/PDFReorder';
 import JPGToPDF from './pages/tools/JPGToPDF';
 import PDFSignature from './pages/tools/PDFSignature';
@@ -15,7 +14,6 @@ import TextToPDF from './pages/tools/TextToPDF';
 import InvoiceGenerator from './pages/tools/InvoiceGenerator';
 import CVBuilder from './pages/tools/CVBuilder';
 import ImageConverter from './pages/tools/ImageConverter';
-import ImageCompressor from './pages/tools/ImageCompressor';
 import UnitConverter from './pages/tools/UnitConverter';
 import ColorPaletteGenerator from './pages/tools/ColorPaletteGenerator';
 import TextCounter from './pages/tools/TextCounter';
