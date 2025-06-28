@@ -213,7 +213,6 @@ const UnitPriceCalculator: React.FC = () => {
           </ol>
         </div>
 
-        {/* Main Work Area */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Input Section */}
           <div className="space-y-6">

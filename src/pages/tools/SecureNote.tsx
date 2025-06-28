@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Lock, Copy, Clock, RefreshCw, Key, Eye, EyeOff, Save, Link as LinkIcon, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Lock, Copy, Clock, RefreshCw, Key, Eye, EyeOff, Save, Link as LinkIcon, AlertTriangle, Mail, Check } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import CryptoJS from 'crypto-js';
 

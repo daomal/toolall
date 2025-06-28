@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ArrowLeft, ArrowUpDown, Upload, Download, RotateCw, RotateCcw, Trash2, Eye, X, GripVertical } from 'lucide-react';
+import { ArrowLeft, ArrowUpDown, Upload, Download, RotateCw, RotateCcw, Trash2, Eye, X, GripVertical, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { PDFDocument, degrees } from 'pdf-lib';
 import { saveAs } from 'file-saver';
@@ -203,6 +203,20 @@ const PDFOrganizer: React.FC = () => {
 
   const closePreview = () => {
     setPreviewPage(null);
+  };
+
+  const movePage = (pageId: string, direction: 'left' | 'right') => {
+    setPages(prevPages => {
+      const index = prevPages.findIndex(page => page.id === pageId);
+      if (index === -1) return prevPages;
+      
+      const newIndex = direction === 'left' ? Math.max(0, index - 1) : Math.min(prevPages.length - 1, index + 1);
+      if (newIndex === index) return prevPages;
+      
+      const newPages = [...prevPages];
+      [newPages[index], newPages[newIndex]] = [newPages[newIndex], newPages[index]];
+      return newPages;
+    });
   };
 
   const processPDF = async () => {
@@ -543,6 +557,22 @@ const PDFOrganizer: React.FC = () => {
                                   </div>
                                   
                                   <div className="flex justify-between">
+                                    <button
+                                      onClick={() => movePage(page.id, 'left')}
+                                      disabled={index === 0}
+                                      className="p-1 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                      title="Pindah ke kiri"
+                                    >
+                                      <ArrowLeft className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                      onClick={() => movePage(page.id, 'right')}
+                                      disabled={index === pages.length - 1}
+                                      className="p-1 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                      title="Pindah ke kanan"
+                                    >
+                                      <ArrowRight className="w-4 h-4" />
+                                    </button>
                                     <button
                                       onClick={() => rotatePage(page.id, 'counterclockwise')}
                                       className="p-1 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors duration-200"
