@@ -1,5 +1,5 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { ThemeProvider } from './contexts/ThemeContext';
 import Layout from './components/Layout';
 import HomePage from './pages/HomePage';
@@ -55,10 +55,22 @@ import SecureNote from './pages/tools/SecureNote';
 import BMICalculator from './pages/tools/BMICalculator';
 import CalorieCalculator from './pages/tools/CalorieCalculator';
 
+// SEO component for route tracking
+const RouteTracker = () => {
+  const location = useLocation();
+  
+  useEffect(() => {
+    // This is handled in main.tsx now
+  }, [location]);
+  
+  return null;
+};
+
 function App() {
   return (
     <ThemeProvider>
       <Router>
+        <RouteTracker />
         <Layout>
           <Routes>
             <Route path="/" element={<HomePage />} />
