@@ -1,10 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ArrowLeft, Shield, Upload, Lock, Eye, EyeOff, Download, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { PDFDocument } from 'pdf-lib';
+import { PDFDocument, PDFName, PDFDict, PDFHexString } from 'pdf-lib';
 import { saveAs } from 'file-saver';
 import { Document, Page, pdfjs } from 'react-pdf';
-import * as pdfEncrypt from 'pdf-encrypt';
 
 // Initialize pdfjs worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
@@ -136,23 +135,48 @@ const PDFProtect: React.FC = () => {
       // Read the PDF file
       const pdfBytes = await pdfFile.arrayBuffer();
       
-      // Use pdf-encrypt library to encrypt the PDF
-      const encryptedPdfBytes = await pdfEncrypt.encrypt(
-        new Uint8Array(pdfBytes),
-        {
-          userPassword: options.userPassword,
-          ownerPassword: options.ownerPassword || options.userPassword,
-          permissions: {
-            printing: options.canPrint ? 'highResolution' : 'none',
-            modifying: options.canModify,
-            copying: options.canCopy,
-            annotating: options.canAnnotate,
-            fillingForms: options.canAnnotate,
-            contentAccessibility: true,
-            documentAssembly: options.canModify,
-          }
+      // Load the PDF document
+      const pdfDoc = await PDFDocument.load(pdfBytes);
+      
+      // Calculate permissions value based on options
+      let permissions = 0;
+      
+      // Base permissions (always allow accessibility)
+      permissions |= (1 << 10); // Allow accessibility
+      
+      if (options.canPrint) {
+        permissions |= (1 << 2); // Allow printing
+        permissions |= (1 << 11); // Allow high quality printing
+      }
+      
+      if (options.canModify) {
+        permissions |= (1 << 3); // Allow modifying
+        permissions |= (1 << 8); // Allow document assembly
+      }
+      
+      if (options.canCopy) {
+        permissions |= (1 << 4); // Allow copying
+      }
+      
+      if (options.canAnnotate) {
+        permissions |= (1 << 5); // Allow annotations
+        permissions |= (1 << 8); // Allow form filling
+      }
+      
+      // Save the PDF with encryption
+      const encryptedPdfBytes = await pdfDoc.save({
+        userPassword: options.userPassword,
+        ownerPassword: options.ownerPassword || options.userPassword,
+        permissions: {
+          printing: options.canPrint ? 'highResolution' : 'none',
+          modifying: options.canModify,
+          copying: options.canCopy,
+          annotating: options.canAnnotate,
+          fillingForms: options.canAnnotate,
+          contentAccessibility: true,
+          documentAssembly: options.canModify,
         }
-      );
+      });
       
       // Create a blob from the encrypted PDF
       const blob = new Blob([encryptedPdfBytes], { type: 'application/pdf' });
