@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ArrowLeft, Shield, Upload, Lock, Eye, EyeOff, Download, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { PDFDocument, PDFName, PDFDict, PDFHexString } from 'pdf-lib';
+import { PDFDocument } from 'pdf-lib';
 import { saveAs } from 'file-saver';
 import { Document, Page, pdfjs } from 'react-pdf';
 
@@ -137,31 +137,6 @@ const PDFProtect: React.FC = () => {
       
       // Load the PDF document
       const pdfDoc = await PDFDocument.load(pdfBytes);
-      
-      // Calculate permissions value based on options
-      let permissions = 0;
-      
-      // Base permissions (always allow accessibility)
-      permissions |= (1 << 10); // Allow accessibility
-      
-      if (options.canPrint) {
-        permissions |= (1 << 2); // Allow printing
-        permissions |= (1 << 11); // Allow high quality printing
-      }
-      
-      if (options.canModify) {
-        permissions |= (1 << 3); // Allow modifying
-        permissions |= (1 << 8); // Allow document assembly
-      }
-      
-      if (options.canCopy) {
-        permissions |= (1 << 4); // Allow copying
-      }
-      
-      if (options.canAnnotate) {
-        permissions |= (1 << 5); // Allow annotations
-        permissions |= (1 << 8); // Allow form filling
-      }
       
       // Save the PDF with encryption
       const encryptedPdfBytes = await pdfDoc.save({
