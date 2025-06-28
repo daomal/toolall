@@ -36,17 +36,36 @@
 }
 
 @keyframes searchBorderGlow {
-  0% { border-color: rgba(59, 130, 246, 0.3); box-shadow: 0 0 5px rgba(59, 130, 246, 0.3); }
-  25% { border-color: rgba(59, 130, 246, 0.8); box-shadow: 0 0 10px rgba(59, 130, 246, 0.5); }
-  50% { border-color: rgba(99, 102, 241, 0.8); box-shadow: 0 0 15px rgba(99, 102, 241, 0.5); }
-  75% { border-color: rgba(139, 92, 246, 0.8); box-shadow: 0 0 10px rgba(139, 92, 246, 0.5); }
-  100% { border-color: rgba(59, 130, 246, 0.3); box-shadow: 0 0 5px rgba(59, 130, 246, 0.3); }
+  0% { border-color: rgba(59, 130, 246, 0.5); box-shadow: 0 0 10px rgba(59, 130, 246, 0.5); }
+  25% { border-color: rgba(59, 130, 246, 1); box-shadow: 0 0 15px rgba(59, 130, 246, 0.8); }
+  50% { border-color: rgba(99, 102, 241, 1); box-shadow: 0 0 20px rgba(99, 102, 241, 0.8); }
+  75% { border-color: rgba(139, 92, 246, 1); box-shadow: 0 0 15px rgba(139, 92, 246, 0.8); }
+  100% { border-color: rgba(59, 130, 246, 0.5); box-shadow: 0 0 10px rgba(59, 130, 246, 0.5); }
 }
 
 @keyframes textSwap {
-  0%, 45% { content: "Mastur Tools"; }
-  50%, 95% { content: "All-in-One Tools"; }
-  100% { content: "Mastur Tools"; }
+  0%, 40% { 
+    opacity: 1;
+    transform: translateY(0);
+    content: "Mastur"; 
+  }
+  45% { 
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  50% { 
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  55%, 95% { 
+    opacity: 1;
+    transform: translateY(0);
+    content: "All-in-One"; 
+  }
+  100% { 
+    opacity: 1;
+    content: "Mastur"; 
+  }
 }
 
 .animate-confetti {
@@ -74,14 +93,14 @@
 }
 
 .card-top-shadow {
-  box-shadow: 0 -8px 15px -1px rgba(59, 130, 246, 0.3), 0 -4px 6px -1px rgba(59, 130, 246, 0.2);
+  box-shadow: 0 -8px 20px -1px rgba(59, 130, 246, 0.5), 0 -4px 10px -1px rgba(59, 130, 246, 0.4);
 }
 
 .dark .card-top-shadow {
-  box-shadow: 0 -8px 15px -1px rgba(96, 165, 250, 0.2), 0 -4px 6px -1px rgba(96, 165, 250, 0.1);
+  box-shadow: 0 -8px 20px -1px rgba(96, 165, 250, 0.4), 0 -4px 10px -1px rgba(96, 165, 250, 0.3);
 }
 
 .text-swap::before {
-  content: "Mastur Tools";
+  content: "Mastur";
   animation: textSwap 8s infinite;
 }
