@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Calendar, Plus, Clock, MapPin, Trash2, Download, Share2, Save } from 'lucide-react';
+import { ArrowLeft, BookOpen, Plus, Clock, MapPin, Trash2, Download, Share2, Save } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';

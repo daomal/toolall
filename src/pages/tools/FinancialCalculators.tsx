@@ -359,7 +359,7 @@ const FinancialCalculators: React.FC = () => {
                   onChange={(e) => setVatInput(prev => ({ ...prev, excludeVAT: e.target.checked }))}
                   className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 dark:border-gray-600 rounded"
                 />
-                <label htmlFor="exclude-vat" className="ml-2 block text-sm text-gray-900 dark:text-white">
+                <label htmlFor="exclude-vat" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
                   Harga belum termasuk PPN (tambahkan PPN)
                 </label>
               </div>

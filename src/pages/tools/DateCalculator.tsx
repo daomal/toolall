@@ -786,7 +786,7 @@ const DateCalculator: React.FC = () => {
                             onClick={() => removeCustomHoliday(holiday)}
                             className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                           >
-                            <X className="w-4 h-4" />
+                            <Minus className="w-4 h-4" />
                           </button>
                         </div>
                       ))}

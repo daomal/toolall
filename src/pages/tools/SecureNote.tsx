@@ -67,7 +67,7 @@ const SecureNote: React.FC = () => {
   
   // Generate random password
   const generateRandomPassword = () => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()';
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+';
     let password = '';
     for (let i = 0; i < 12; i++) {
       password += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -123,8 +123,8 @@ const SecureNote: React.FC = () => {
       const encodedData = btoa(JSON.stringify(dataObject));
       
       // Create link
-      const link = `${window.location.origin}${window.location.pathname}#${encodedData}`;
-      setGeneratedLink(link);
+      const shareUrl = `${window.location.origin}${window.location.pathname}#${encodedData}`;
+      setGeneratedLink(shareUrl);
       setShowLinkModal(true);
       
     } catch (error) {
