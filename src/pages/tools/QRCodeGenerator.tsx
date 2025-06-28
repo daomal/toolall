@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, QrCode, Download, Copy, RefreshCw, Smartphone } from 'lucide-react';
+import { ArrowLeft, QrCode, Download, Copy, RefreshCw, Smartphone, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import QRCode from 'qrcode';
 

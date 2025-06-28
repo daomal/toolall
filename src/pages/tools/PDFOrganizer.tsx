@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ArrowLeft, ArrowUpDown, ArrowRight, ArrowDown, Upload, Download, RotateCw, RotateCcw, Trash2, Eye, X, GripVertical } from 'lucide-react';
+import { ArrowLeft, ArrowUpDown, ArrowRight, ArrowLeft as ArrowLeftIcon, Upload, Download, RotateCw, RotateCcw, Trash2, Eye, X, GripVertical } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { PDFDocument, degrees } from 'pdf-lib';
 import { saveAs } from 'file-saver';
@@ -564,7 +564,7 @@ const PDFOrganizer: React.FC = () => {
                                       className="p-1 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                       title="Pindah ke kiri"
                                     >
-                                      <ArrowLeft className="w-4 h-4" />
+                                      <ArrowLeftIcon className="w-4 h-4" />
                                     </button>
                                     <button
                                       onClick={() => movePage(page.id, 'right')}

@@ -141,18 +141,21 @@ const PDFProtect: React.FC = () => {
       const ownerPassword = options.ownerPassword || options.userPassword;
       
       // Set permissions
-      await pdfDoc.encrypt({
+      const permissions = {
+        printing: options.canPrint ? 'highResolution' : 'none',
+        modifying: options.canModify,
+        copying: options.canCopy,
+        annotating: options.canAnnotate,
+        fillingForms: options.canAnnotate,
+        contentAccessibility: true,
+        documentAssembly: options.canModify,
+      };
+      
+      // Encrypt the PDF
+      pdfDoc.encrypt({
         userPassword,
         ownerPassword,
-        permissions: {
-          printing: options.canPrint ? 'highResolution' : 'none',
-          modifying: options.canModify,
-          copying: options.canCopy,
-          annotating: options.canAnnotate,
-          fillingForms: options.canAnnotate,
-          contentAccessibility: true,
-          documentAssembly: options.canModify,
-        },
+        permissions,
       });
       
       // Save the encrypted PDF

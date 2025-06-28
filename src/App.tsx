@@ -25,7 +25,7 @@ import ProfitCalculator from './pages/tools/ProfitCalculator';
 import QRCodeGenerator from './pages/tools/QRCodeGenerator';
 import EmailSignatureGenerator from './pages/tools/EmailSignatureGenerator';
 
-// Import new tool pages (placeholder components)
+// Import new tool pages
 import PDFOrganizer from './pages/tools/PDFOrganizer';
 import PDFPageNumbers from './pages/tools/PDFPageNumbers';
 import PDFProtect from './pages/tools/PDFProtect';
@@ -67,7 +67,6 @@ function App() {
             
             {/* Dokumen & PDF Tools */}
             <Route path="/pdf-merger" element={<PDFMerger />} />
-            <Route path="/pdf-splitter" element={<PDFSplitter />} />
             <Route path="/pdf-reorder" element={<PDFReorder />} />
             <Route path="/jpg-to-pdf" element={<JPGToPDF />} />
             <Route path="/pdf-signature" element={<PDFSignature />} />
@@ -83,7 +82,6 @@ function App() {
             
             {/* Gambar & Grafis Tools */}
             <Route path="/image-converter" element={<ImageConverter />} />
-            <Route path="/image-compressor" element={<ImageCompressor />} />
             <Route path="/konverter-unit" element={<UnitConverter />} />
             <Route path="/color-palette-generator" element={<ColorPaletteGenerator />} />
             <Route path="/social-media-resizer" element={<SocialMediaResizer />} />

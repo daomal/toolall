@@ -431,11 +431,9 @@ const ItineraryPlanner: React.FC = () => {
 
             {/* Add Activity Form */}
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Tambah Aktivitas
-                </h3>
-              </div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                Tambah Aktivitas
+              </h3>
               
               <div className="space-y-4">
                 <div>
@@ -517,7 +515,7 @@ const ItineraryPlanner: React.FC = () => {
               </div>
             </div>
 
-            {/* Share & Export */}
+            {/* Export & Save */}
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                 Bagikan & Ekspor
