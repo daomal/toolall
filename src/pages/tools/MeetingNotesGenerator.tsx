@@ -51,7 +51,7 @@ interface MeetingNotes {
 }
 
 const MeetingNotesGenerator: React.FC = () => {
-  // ... rest of the code remains exactly the same ...
+  // ... rest of the component code ...
 };
 
 export default MeetingNotesGenerator;
