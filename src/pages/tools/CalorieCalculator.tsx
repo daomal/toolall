@@ -34,33 +34,107 @@ interface NutritionSummary {
   fatGoalPercentage: number;
 }
 
-// Food database (simplified)
+// Food database with Indonesian foods
 const foodDatabase: FoodItem[] = [
-  { id: '1', name: 'Nasi Putih (1 porsi)', calories: 204, protein: 4.2, carbs: 44, fat: 0.4, quantity: 1, unit: 'porsi' },
-  { id: '2', name: 'Ayam Goreng (1 potong)', calories: 260, protein: 31, carbs: 0, fat: 14, quantity: 1, unit: 'potong' },
-  { id: '3', name: 'Telur Rebus (1 butir)', calories: 78, protein: 6.3, carbs: 0.6, fat: 5.3, quantity: 1, unit: 'butir' },
-  { id: '4', name: 'Tempe Goreng (1 potong)', calories: 118, protein: 11, carbs: 6.2, fat: 6.4, quantity: 1, unit: 'potong' },
-  { id: '5', name: 'Tahu Goreng (1 potong)', calories: 78, protein: 8.5, carbs: 1.9, fat: 5, quantity: 1, unit: 'potong' },
-  { id: '6', name: 'Sayur Bayam (1 mangkuk)', calories: 41, protein: 3.5, carbs: 6.8, fat: 0.5, quantity: 1, unit: 'mangkuk' },
-  { id: '7', name: 'Apel (1 buah)', calories: 95, protein: 0.5, carbs: 25, fat: 0.3, quantity: 1, unit: 'buah' },
-  { id: '8', name: 'Pisang (1 buah)', calories: 105, protein: 1.3, carbs: 27, fat: 0.4, quantity: 1, unit: 'buah' },
-  { id: '9', name: 'Susu Full Cream (1 gelas)', calories: 146, protein: 8, carbs: 11, fat: 8, quantity: 1, unit: 'gelas' },
-  { id: '10', name: 'Roti Tawar (1 lembar)', calories: 80, protein: 2.5, carbs: 15, fat: 1, quantity: 1, unit: 'lembar' },
-  { id: '11', name: 'Mie Instan (1 bungkus)', calories: 380, protein: 7, carbs: 54, fat: 14, quantity: 1, unit: 'bungkus' },
-  { id: '12', name: 'Nasi Goreng (1 porsi)', calories: 320, protein: 8, carbs: 45, fat: 12, quantity: 1, unit: 'porsi' },
-  { id: '13', name: 'Soto Ayam (1 mangkuk)', calories: 270, protein: 18, carbs: 30, fat: 9, quantity: 1, unit: 'mangkuk' },
-  { id: '14', name: 'Gado-gado (1 porsi)', calories: 300, protein: 13, carbs: 28, fat: 16, quantity: 1, unit: 'porsi' },
-  { id: '15', name: 'Bakso (1 mangkuk)', calories: 350, protein: 20, carbs: 35, fat: 14, quantity: 1, unit: 'mangkuk' },
-  { id: '16', name: 'Sate Ayam (5 tusuk)', calories: 310, protein: 26, carbs: 12, fat: 18, quantity: 1, unit: 'porsi' },
-  { id: '17', name: 'Rendang (1 porsi)', calories: 340, protein: 25, carbs: 7, fat: 24, quantity: 1, unit: 'porsi' },
-  { id: '18', name: 'Bubur Ayam (1 porsi)', calories: 220, protein: 10, carbs: 35, fat: 5, quantity: 1, unit: 'porsi' },
-  { id: '19', name: 'Kopi Hitam (1 cangkir)', calories: 2, protein: 0.1, carbs: 0, fat: 0, quantity: 1, unit: 'cangkir' },
-  { id: '20', name: 'Teh Manis (1 gelas)', calories: 60, protein: 0, carbs: 15, fat: 0, quantity: 1, unit: 'gelas' },
-  { id: '21', name: 'Es Teh (1 gelas)', calories: 70, protein: 0, carbs: 18, fat: 0, quantity: 1, unit: 'gelas' },
-  { id: '22', name: 'Jus Jeruk (1 gelas)', calories: 110, protein: 1.5, carbs: 26, fat: 0.5, quantity: 1, unit: 'gelas' },
-  { id: '23', name: 'Air Mineral (1 botol)', calories: 0, protein: 0, carbs: 0, fat: 0, quantity: 1, unit: 'botol' },
-  { id: '24', name: 'Kerupuk (5 buah)', calories: 65, protein: 1, carbs: 10, fat: 2.5, quantity: 1, unit: 'porsi' },
-  { id: '25', name: 'Sambal (1 sendok)', calories: 15, protein: 0.5, carbs: 3, fat: 0.2, quantity: 1, unit: 'sendok' }
+  // Makanan Pokok
+  { id: '1', name: 'Nasi Putih (100g)', calories: 175, protein: 4, carbs: 40, fat: 0.3, quantity: 1, unit: 'porsi' },
+  { id: '2', name: 'Nasi Merah (100g)', calories: 110, protein: 2.6, carbs: 23, fat: 0.9, quantity: 1, unit: 'porsi' },
+  { id: '3', name: 'Nasi Uduk (200g)', calories: 506, protein: 9, carbs: 85, fat: 14, quantity: 1, unit: 'porsi' },
+  { id: '4', name: 'Kentang Rebus (100g)', calories: 130, protein: 2, carbs: 30, fat: 0.1, quantity: 1, unit: 'buah' },
+  { id: '5', name: 'Ubi Jalar Rebus (100g)', calories: 105, protein: 1.6, carbs: 24, fat: 0.1, quantity: 1, unit: 'buah' },
+  { id: '6', name: 'Singkong Rebus (100g)', calories: 160, protein: 1.4, carbs: 38, fat: 0.3, quantity: 1, unit: 'potong' },
+  { id: '7', name: 'Lontong/Ketupat (1 buah)', calories: 38, protein: 0.7, carbs: 8, fat: 0.1, quantity: 1, unit: 'buah' },
+  { id: '8', name: 'Mie Instan Goreng (1 bungkus)', calories: 350, protein: 7, carbs: 54, fat: 14, quantity: 1, unit: 'bungkus' },
+  { id: '9', name: 'Roti Tawar Putih (1 lembar)', calories: 66, protein: 2, carbs: 12, fat: 1, quantity: 1, unit: 'lembar' },
+  
+  // Lauk Pauk
+  { id: '10', name: 'Ayam Goreng (dada, 100g)', calories: 184, protein: 31, carbs: 0, fat: 7, quantity: 1, unit: 'potong' },
+  { id: '11', name: 'Ayam Bakar (100g)', calories: 164, protein: 28, carbs: 0, fat: 5, quantity: 1, unit: 'potong' },
+  { id: '12', name: 'Gulai Ayam (100g)', calories: 165, protein: 14, carbs: 5, fat: 10, quantity: 1, unit: 'porsi' },
+  { id: '13', name: 'Rendang Daging Sapi (1 potong)', calories: 420, protein: 25, carbs: 7, fat: 24, quantity: 1, unit: 'potong' },
+  { id: '14', name: 'Sate Ayam + Bumbu Kacang (10 tusuk)', calories: 680, protein: 40, carbs: 12, fat: 30, quantity: 1, unit: 'porsi' },
+  { id: '15', name: 'Sate Kambing + Bumbu (10 tusuk)', calories: 729, protein: 45, carbs: 10, fat: 35, quantity: 1, unit: 'porsi' },
+  { id: '16', name: 'Ikan Kembung Goreng (1 ekor)', calories: 274, protein: 20, carbs: 0, fat: 12, quantity: 1, unit: 'ekor' },
+  { id: '17', name: 'Ikan Lele Goreng (1 ekor)', calories: 105, protein: 12, carbs: 0, fat: 5, quantity: 1, unit: 'ekor' },
+  { id: '18', name: 'Telur Rebus (1 butir)', calories: 97, protein: 6.3, carbs: 0.6, fat: 5.3, quantity: 1, unit: 'butir' },
+  { id: '19', name: 'Telur Ceplok (1 butir)', calories: 110, protein: 6.3, carbs: 0.6, fat: 8, quantity: 1, unit: 'butir' },
+  { id: '20', name: 'Telur Dadar (1 butir)', calories: 188, protein: 6.3, carbs: 0.6, fat: 12, quantity: 1, unit: 'butir' },
+  { id: '21', name: 'Tempe Goreng (1 potong)', calories: 118, protein: 11, carbs: 6.2, fat: 6.4, quantity: 1, unit: 'potong' },
+  { id: '22', name: 'Tahu Goreng (1 potong)', calories: 111, protein: 8.5, carbs: 1.9, fat: 5, quantity: 1, unit: 'potong' },
+  
+  // Sayuran
+  { id: '23', name: 'Sayur Asem (1 mangkuk)', calories: 88, protein: 3, carbs: 10, fat: 4, quantity: 1, unit: 'mangkuk' },
+  { id: '24', name: 'Capcay (1 porsi)', calories: 130, protein: 7, carbs: 10, fat: 7, quantity: 1, unit: 'porsi' },
+  { id: '25', name: 'Kangkung (1 porsi)', calories: 30, protein: 3, carbs: 5, fat: 0.4, quantity: 1, unit: 'porsi' },
+  { id: '26', name: 'Bayam (1 porsi)', calories: 23, protein: 2.9, carbs: 3.6, fat: 0.4, quantity: 1, unit: 'porsi' },
+  { id: '27', name: 'Terong (1 porsi)', calories: 28, protein: 1, carbs: 6, fat: 0.2, quantity: 1, unit: 'porsi' },
+  { id: '28', name: 'Tauge (1 porsi)', calories: 37, protein: 3, carbs: 6, fat: 0.2, quantity: 1, unit: 'porsi' },
+  
+  // Makanan Lengkap
+  { id: '29', name: 'Soto Ayam (1 mangkuk)', calories: 400, protein: 18, carbs: 30, fat: 9, quantity: 1, unit: 'mangkuk' },
+  { id: '30', name: 'Soto Betawi (1 mangkuk)', calories: 135, protein: 10, carbs: 15, fat: 8, quantity: 1, unit: 'mangkuk' },
+  { id: '31', name: 'Nasi Goreng (1 porsi)', calories: 740, protein: 15, carbs: 90, fat: 30, quantity: 1, unit: 'porsi' },
+  { id: '32', name: 'Gado-gado (1 porsi)', calories: 300, protein: 13, carbs: 28, fat: 16, quantity: 1, unit: 'porsi' },
+  { id: '33', name: 'Bakso (1 mangkuk)', calories: 350, protein: 20, carbs: 35, fat: 14, quantity: 1, unit: 'mangkuk' },
+  { id: '34', name: 'Bubur Ayam (1 porsi)', calories: 220, protein: 10, carbs: 35, fat: 5, quantity: 1, unit: 'porsi' },
+  
+  // Gorengan
+  { id: '35', name: 'Bakwan Sayur (1 buah)', calories: 137, protein: 3, carbs: 15, fat: 7, quantity: 1, unit: 'buah' },
+  { id: '36', name: 'Tahu Isi (1 buah)', calories: 134, protein: 7, carbs: 10, fat: 8, quantity: 1, unit: 'buah' },
+  { id: '37', name: 'Risoles Sayur (1 buah)', calories: 96, protein: 2, carbs: 12, fat: 5, quantity: 1, unit: 'buah' },
+  { id: '38', name: 'Risol Mayo (1 buah)', calories: 275, protein: 7, carbs: 25, fat: 15, quantity: 1, unit: 'buah' },
+  { id: '39', name: 'Pisang Goreng (1 buah)', calories: 68, protein: 1, carbs: 15, fat: 2, quantity: 1, unit: 'buah' },
+  { id: '40', name: 'Pastel (1 buah)', calories: 302, protein: 5, carbs: 30, fat: 18, quantity: 1, unit: 'buah' },
+  
+  // Kue Basah
+  { id: '41', name: 'Lapis Legit (1 potong)', calories: 307, protein: 4, carbs: 30, fat: 20, quantity: 1, unit: 'potong' },
+  { id: '42', name: 'Lemper Ayam (1 buah)', calories: 247, protein: 5, carbs: 40, fat: 8, quantity: 1, unit: 'buah' },
+  { id: '43', name: 'Kue Lumpur (1 buah)', calories: 232, protein: 3, carbs: 30, fat: 12, quantity: 1, unit: 'buah' },
+  { id: '44', name: 'Bika Ambon (1 potong)', calories: 185, protein: 2, carbs: 30, fat: 7, quantity: 1, unit: 'potong' },
+  { id: '45', name: 'Klepon (1 buah)', calories: 110, protein: 1, carbs: 25, fat: 1, quantity: 1, unit: 'buah' },
+  
+  // Buah-buahan
+  { id: '46', name: 'Alpukat (100g)', calories: 322, protein: 4, carbs: 17, fat: 29, quantity: 1, unit: 'buah' },
+  { id: '47', name: 'Pisang Ambon (100g)', calories: 108, protein: 1.3, carbs: 27, fat: 0.4, quantity: 1, unit: 'buah' },
+  { id: '48', name: 'Durian (100g)', calories: 147, protein: 1.5, carbs: 27, fat: 5, quantity: 1, unit: 'porsi' },
+  { id: '49', name: 'Mangga (100g)', calories: 74, protein: 0.5, carbs: 18, fat: 0.3, quantity: 1, unit: 'buah' },
+  { id: '50', name: 'Semangka (100g)', calories: 30, protein: 0.6, carbs: 7.5, fat: 0.2, quantity: 1, unit: 'potong' },
+  { id: '51', name: 'Melon (100g)', calories: 34, protein: 0.8, carbs: 8, fat: 0.2, quantity: 1, unit: 'potong' },
+  { id: '52', name: 'Pepaya (100g)', calories: 46, protein: 0.5, carbs: 11, fat: 0.1, quantity: 1, unit: 'potong' },
+  { id: '53', name: 'Jambu Biji (100g)', calories: 61, protein: 0.8, carbs: 14, fat: 0.5, quantity: 1, unit: 'buah' },
+  { id: '54', name: 'Jeruk (100g)', calories: 62, protein: 1.2, carbs: 15, fat: 0.2, quantity: 1, unit: 'buah' },
+  { id: '55', name: 'Salak (100g)', calories: 89, protein: 0.8, carbs: 20, fat: 0.4, quantity: 1, unit: 'buah' },
+  { id: '56', name: 'Rambutan (100g)', calories: 82, protein: 0.9, carbs: 20, fat: 0.3, quantity: 1, unit: 'porsi' },
+  { id: '57', name: 'Nangka (100g)', calories: 95, protein: 1.7, carbs: 23, fat: 0.4, quantity: 1, unit: 'potong' },
+  { id: '58', name: 'Buah Naga (100g)', calories: 102, protein: 1.1, carbs: 22, fat: 0.4, quantity: 1, unit: 'potong' },
+  
+  // Minuman
+  { id: '59', name: 'Air Putih (1 gelas)', calories: 0, protein: 0, carbs: 0, fat: 0, quantity: 1, unit: 'gelas' },
+  { id: '60', name: 'Kopi Hitam (tanpa gula)', calories: 18, protein: 0.3, carbs: 0, fat: 0, quantity: 1, unit: 'cangkir' },
+  { id: '61', name: 'Teh Tawar (1 cangkir)', calories: 29, protein: 0, carbs: 0.5, fat: 0, quantity: 1, unit: 'cangkir' },
+  { id: '62', name: 'Es Teh Manis (1 gelas)', calories: 168, protein: 0, carbs: 42, fat: 0, quantity: 1, unit: 'gelas' },
+  { id: '63', name: 'Es Kopi Susu Gula Aren (1 gelas)', calories: 350, protein: 5, carbs: 50, fat: 15, quantity: 1, unit: 'gelas' },
+  { id: '64', name: 'Boba Milk Tea (1 gelas)', calories: 700, protein: 8, carbs: 120, fat: 20, quantity: 1, unit: 'gelas' },
+  { id: '65', name: 'Es Cendol (1 mangkok)', calories: 386, protein: 1, carbs: 60, fat: 15, quantity: 1, unit: 'mangkok' },
+  { id: '66', name: 'Es Campur (1 mangkok)', calories: 300, protein: 2, carbs: 70, fat: 5, quantity: 1, unit: 'mangkok' },
+  { id: '67', name: 'Minuman Bersoda (1 kaleng)', calories: 200, protein: 0, carbs: 50, fat: 0, quantity: 1, unit: 'kaleng' },
+  { id: '68', name: 'Wedang Jahe (1 gelas)', calories: 242, protein: 0, carbs: 60, fat: 0, quantity: 1, unit: 'gelas' },
+  
+  // Bahan Makanan
+  { id: '69', name: 'Daging Sapi (100g)', calories: 300, protein: 26, carbs: 0, fat: 21, quantity: 1, unit: 'porsi' },
+  { id: '70', name: 'Daging Ayam (dada, 100g)', calories: 170, protein: 31, carbs: 0, fat: 4, quantity: 1, unit: 'potong' },
+  { id: '71', name: 'Daging Ayam (paha, 100g)', calories: 209, protein: 18, carbs: 0, fat: 15, quantity: 1, unit: 'potong' },
+  { id: '72', name: 'Ikan Kembung (100g)', calories: 305, protein: 22, carbs: 0, fat: 24, quantity: 1, unit: 'ekor' },
+  { id: '73', name: 'Ikan Tongkol (100g)', calories: 100, protein: 21, carbs: 0, fat: 1, quantity: 1, unit: 'potong' },
+  { id: '74', name: 'Udang (100g)', calories: 99, protein: 21, carbs: 0, fat: 1, quantity: 1, unit: 'porsi' },
+  { id: '75', name: 'Telur Puyuh (100g)', calories: 158, protein: 13, carbs: 0.4, fat: 11, quantity: 1, unit: 'porsi' },
+  
+  // Cemilan
+  { id: '76', name: 'Keripik Singkong (100g)', calories: 485, protein: 1.2, carbs: 72, fat: 20, quantity: 1, unit: 'porsi' },
+  { id: '77', name: 'Kerupuk Udang (20g)', calories: 72, protein: 2, carbs: 15, fat: 0.5, quantity: 1, unit: 'porsi' },
+  { id: '78', name: 'Nastar (1 butir)', calories: 75, protein: 1, carbs: 10, fat: 3.5, quantity: 1, unit: 'butir' },
+  { id: '79', name: 'Kastengel (1 butir)', calories: 21, protein: 0.5, carbs: 2, fat: 1.5, quantity: 1, unit: 'butir' },
+  { id: '80', name: 'Putri Salju (1 butir)', calories: 30, protein: 0.5, carbs: 4, fat: 1.5, quantity: 1, unit: 'butir' }
 ];
 
 const CalorieCalculator: React.FC = () => {
@@ -876,7 +950,7 @@ const CalorieCalculator: React.FC = () => {
             </div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Database Makanan</h3>
             <p className="text-gray-600 dark:text-gray-400 text-sm">
-              Ribuan makanan dengan informasi nutrisi lengkap
+              Database makanan Indonesia dengan informasi nutrisi lengkap
             </p>
           </div>
 

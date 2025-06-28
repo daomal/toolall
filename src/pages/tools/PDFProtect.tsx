@@ -18,16 +18,13 @@ interface ProtectionOptions {
 }
 
 const PDFProtect: React.FC = () => {
+  // State for file
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [numPages, setNumPages] = useState<number | null>(null);
   const [previewPage, setPreviewPage] = useState<number | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showOwnerPassword, setShowOwnerPassword] = useState(false);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   
+  // State for protection options
   const [options, setOptions] = useState<ProtectionOptions>({
     userPassword: '',
     ownerPassword: '',
@@ -36,6 +33,13 @@ const PDFProtect: React.FC = () => {
     canCopy: true,
     canAnnotate: false
   });
+  
+  // UI state
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showOwnerPassword, setShowOwnerPassword] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -163,6 +167,8 @@ const PDFProtect: React.FC = () => {
       
       // Save the file
       saveAs(blob, newFileName);
+      
+      // Show success message
       setSuccessMessage(`PDF berhasil dienkripsi dan disimpan sebagai "${newFileName}"`);
       
     } catch (error) {
