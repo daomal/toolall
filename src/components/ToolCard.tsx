@@ -13,7 +13,7 @@ interface ToolCardProps {
 const ToolCard: React.FC<ToolCardProps> = ({ icon: Icon, title, description, path, category }) => {
   return (
     <Link to={path} className="group">
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200 group-hover:scale-[1.02] group-hover:-translate-y-1">
+      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200 group-hover:scale-[1.02] group-hover:-translate-y-1 card-top-shadow">
         <div className="flex items-center justify-between mb-4">
           <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30 transition-colors duration-200">
             <Icon className="w-6 h-6 text-blue-600 dark:text-blue-400" />

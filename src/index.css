@@ -29,6 +29,12 @@
   100% { transform: scale(1); opacity: 1; }
 }
 
+@keyframes glowEffect {
+  0% { box-shadow: 0 0 0 rgba(59, 130, 246, 0); }
+  50% { box-shadow: 0 0 10px rgba(59, 130, 246, 0.5); }
+  100% { box-shadow: 0 0 0 rgba(59, 130, 246, 0); }
+}
+
 .animate-confetti {
   animation: confetti linear forwards;
 }
@@ -43,4 +49,16 @@
 
 .animate-bounce-in {
   animation: bounceIn 0.5s ease-out;
+}
+
+.animate-glow {
+  animation: glowEffect 2s infinite;
+}
+
+.card-top-shadow {
+  box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1), 0 -2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.dark .card-top-shadow {
+  box-shadow: 0 -4px 6px -1px rgba(255, 255, 255, 0.05), 0 -2px 4px -1px rgba(255, 255, 255, 0.03);
 }
