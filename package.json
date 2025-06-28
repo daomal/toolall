@@ -31,8 +31,7 @@
     "html-to-image": "^1.11.11",
     "qrcode": "^1.5.3",
     "docx": "^8.5.0",
-    "pdf-encrypt": "^1.0.1",
-    "pdf-encrypt-js": "^1.0.3"
+    "pdf-encrypt": "^1.0.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.1",

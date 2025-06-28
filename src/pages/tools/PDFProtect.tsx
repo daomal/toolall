@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { PDFDocument } from 'pdf-lib';
 import { saveAs } from 'file-saver';
 import { Document, Page, pdfjs } from 'react-pdf';
-import * as pdfEncrypt from 'pdf-encrypt-js';
+import * as pdfEncrypt from 'pdf-encrypt';
 
 // Initialize pdfjs worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
@@ -136,7 +136,7 @@ const PDFProtect: React.FC = () => {
       // Read the PDF file
       const pdfBytes = await pdfFile.arrayBuffer();
       
-      // Use pdf-encrypt-js library to encrypt the PDF
+      // Use pdf-encrypt library to encrypt the PDF
       const encryptedPdfBytes = await pdfEncrypt.encrypt(
         new Uint8Array(pdfBytes),
         {
