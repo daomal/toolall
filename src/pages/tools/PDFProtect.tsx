@@ -114,7 +114,7 @@ const PDFProtect: React.FC = () => {
       const randomIndex = Math.floor(Math.random() * charset.length);
       password += charset[randomIndex];
     }
-    return password;
+    setOptions(prev => ({ ...prev, userPassword: password }));
   };
 
   const protectPDF = async () => {
@@ -140,8 +140,8 @@ const PDFProtect: React.FC = () => {
       const userPassword = options.userPassword;
       const ownerPassword = options.ownerPassword || options.userPassword;
       
-      // Encrypt the PDF
-      pdfDoc.encrypt({
+      // Encrypt the PDF with the correct method
+      await pdfDoc.encrypt({
         userPassword,
         ownerPassword,
         permissions: {
@@ -176,7 +176,7 @@ const PDFProtect: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen py-8">
+    <div className="min-h-screen py-8 bg-gray-50 dark:bg-gray-900">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Back Button */}
         <Link 
@@ -377,7 +377,7 @@ const PDFProtect: React.FC = () => {
                       </button>
                       <button
                         type="button"
-                        onClick={() => updateOption('userPassword', generateRandomPassword())}
+                        onClick={() => generateRandomPassword()}
                         className="p-2 mr-1 text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300"
                         title="Generate random password"
                       >
@@ -412,7 +412,7 @@ const PDFProtect: React.FC = () => {
                       </button>
                       <button
                         type="button"
-                        onClick={() => updateOption('ownerPassword', generateRandomPassword())}
+                        onClick={() => generateRandomPassword()}
                         className="p-2 mr-1 text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300"
                         title="Generate random password"
                       >

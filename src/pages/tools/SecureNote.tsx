@@ -66,11 +66,12 @@ const SecureNote: React.FC = () => {
   }, [location]);
   
   // Generate random password
-  const generateRandomPassword = () => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+';
-    let password = '';
-    for (let i = 0; i < 12; i++) {
-      password += chars.charAt(Math.floor(Math.random() * chars.length));
+  const generateRandomPassword = (length: number = 8) => {
+    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+";
+    let password = "";
+    for (let i = 0; i < length; i++) {
+      const randomIndex = Math.floor(Math.random() * charset.length);
+      password += charset[randomIndex];
     }
     setOptions(prev => ({ ...prev, password }));
   };
@@ -218,7 +219,7 @@ const SecureNote: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen py-8">
+    <div className="min-h-screen py-8 bg-gray-50 dark:bg-gray-900">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Back Button */}
         <Link 
@@ -320,7 +321,7 @@ const SecureNote: React.FC = () => {
                       </button>
                       <button
                         type="button"
-                        onClick={generateRandomPassword}
+                        onClick={() => generateRandomPassword()}
                         className="p-2 mr-1 text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300"
                         title="Generate random password"
                       >

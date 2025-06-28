@@ -339,7 +339,7 @@ const ItineraryPlanner: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen py-8">
+    <div className="min-h-screen py-8 bg-gray-50 dark:bg-gray-900">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Back Button */}
         <Link 
@@ -353,7 +353,7 @@ const ItineraryPlanner: React.FC = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 dark:bg-blue-900/20 rounded-full mb-4 shadow-lg shadow-blue-500/20">
-            <Calendar className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+            <BookOpen className="w-8 h-8 text-blue-600 dark:text-blue-400" />
           </div>
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
             Visual Itinerary Planner
@@ -595,7 +595,7 @@ const ItineraryPlanner: React.FC = () => {
               
               {itinerary.days.length === 0 ? (
                 <div className="text-center py-12">
-                  <Calendar className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                  <BookOpen className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
                   <p className="text-gray-500 dark:text-gray-400">
                     Pilih tanggal mulai dan selesai untuk membuat jadwal
                   </p>
