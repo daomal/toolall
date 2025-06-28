@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { ArrowLeft, BookOpen, Plus, Trash2, Clock, Calendar, Save } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { ArrowLeft, BookOpen, Plus, Trash2, Clock, Calendar, Save, Download } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { jsPDF } from 'jspdf';
+import html2canvas from 'html2canvas';
 
 interface Subject {
   id: string;
@@ -77,6 +79,13 @@ const StudyPlanner: React.FC = () => {
     endTime: '',
     target: ''
   });
+  
+  // State for export
+  const [isExporting, setIsExporting] = useState(false);
+  const [exportSuccess, setExportSuccess] = useState(false);
+  
+  // Ref for schedule table
+  const scheduleRef = useRef<HTMLDivElement>(null);
   
   // Initialize new session subject ID when subjects change
   useEffect(() => {
@@ -238,8 +247,99 @@ const StudyPlanner: React.FC = () => {
   };
   
   // Export to PDF
-  const exportToPDF = () => {
-    alert('PDF export functionality will be implemented soon!');
+  const exportToPDF = async () => {
+    if (!scheduleRef.current) return;
+    
+    setIsExporting(true);
+    
+    try {
+      const element = scheduleRef.current;
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        logging: false,
+        useCORS: true,
+        allowTaint: true
+      });
+      
+      const imgData = canvas.toDataURL('image/png');
+      
+      // Calculate dimensions to maintain aspect ratio
+      const imgWidth = 210; // A4 width in mm
+      const pageHeight = 297; // A4 height in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      
+      // Add title
+      pdf.setFontSize(20);
+      pdf.setTextColor(0, 0, 0);
+      pdf.text('Jadwal Belajar', 105, 15, { align: 'center' });
+      
+      // Add date
+      pdf.setFontSize(12);
+      pdf.setTextColor(100, 100, 100);
+      const today = new Date().toLocaleDateString('id-ID', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+      pdf.text(`Dibuat pada: ${today}`, 105, 25, { align: 'center' });
+      
+      let heightLeft = imgHeight;
+      let position = 35; // Start position after title and date
+      
+      // Add image to PDF
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= (pageHeight - position);
+      
+      // Add new pages if needed
+      while (heightLeft > 0) {
+        position = 0;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, -pageHeight + position + imgHeight, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+      
+      // Add subject legend
+      if (subjects.length > 0) {
+        pdf.addPage();
+        pdf.setFontSize(16);
+        pdf.setTextColor(0, 0, 0);
+        pdf.text('Daftar Mata Pelajaran', 105, 20, { align: 'center' });
+        
+        let yPos = 40;
+        subjects.forEach((subject, index) => {
+          pdf.setFillColor(parseInt(subject.color.slice(1, 3), 16), parseInt(subject.color.slice(3, 5), 16), parseInt(subject.color.slice(5, 7), 16));
+          pdf.rect(20, yPos - 5, 10, 10, 'F');
+          
+          pdf.setFontSize(12);
+          pdf.setTextColor(0, 0, 0);
+          pdf.text(`${subject.name}`, 40, yPos);
+          
+          pdf.setFontSize(10);
+          pdf.setTextColor(100, 100, 100);
+          pdf.text(`Prioritas: ${getPriorityLabel(subject.priority)}`, 40, yPos + 7);
+          
+          yPos += 20;
+        });
+      }
+      
+      // Save PDF
+      pdf.save('jadwal-belajar.pdf');
+      setExportSuccess(true);
+      
+      // Reset success message after 3 seconds
+      setTimeout(() => {
+        setExportSuccess(false);
+      }, 3000);
+      
+    } catch (error) {
+      console.error('Error exporting to PDF:', error);
+      alert('Terjadi kesalahan saat mengekspor ke PDF. Silakan coba lagi.');
+    } finally {
+      setIsExporting(false);
+    }
   };
   
   // Get sessions for a specific day
@@ -252,7 +352,7 @@ const StudyPlanner: React.FC = () => {
   // Get time slots for schedule
   const getTimeSlots = (): string[] => {
     const slots = [];
-    for (let hour = 8; hour <= 20; hour++) {
+    for (let hour = 7; hour <= 22; hour++) {
       slots.push(`${hour.toString().padStart(2, '0')}:00`);
     }
     return slots;
@@ -261,10 +361,16 @@ const StudyPlanner: React.FC = () => {
   // Check if a session is at a specific time slot
   const isSessionAtTimeSlot = (session: StudySession, timeSlot: string): boolean => {
     const [slotHour] = timeSlot.split(':').map(Number);
-    const [sessionStartHour] = session.startTime.split(':').map(Number);
-    const [sessionEndHour] = session.endTime.split(':').map(Number);
+    const [sessionStartHour, sessionStartMinute] = session.startTime.split(':').map(Number);
+    const [sessionEndHour, sessionEndMinute] = session.endTime.split(':').map(Number);
     
-    return sessionStartHour <= slotHour && sessionEndHour > slotHour;
+    // Convert to minutes for easier comparison
+    const slotTimeInMinutes = slotHour * 60;
+    const sessionStartInMinutes = sessionStartHour * 60 + sessionStartMinute;
+    const sessionEndInMinutes = sessionEndHour * 60 + sessionEndMinute;
+    
+    // Check if the time slot is within the session time range
+    return sessionStartInMinutes <= slotTimeInMinutes && sessionEndInMinutes > slotTimeInMinutes;
   };
 
   return (
@@ -281,7 +387,7 @@ const StudyPlanner: React.FC = () => {
 
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-amber-100 dark:bg-amber-900/20 rounded-full mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-amber-100 dark:bg-amber-900/20 rounded-full mb-4 shadow-lg shadow-amber-500/20">
             <BookOpen className="w-8 h-8 text-amber-600 dark:text-amber-400" />
           </div>
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
@@ -293,7 +399,7 @@ const StudyPlanner: React.FC = () => {
         </div>
 
         {/* Instructions */}
-        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-6 mb-8">
+        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-6 mb-8 shadow-lg shadow-amber-500/10">
           <h3 className="text-lg font-semibold text-amber-900 dark:text-amber-100 mb-3">
             Fitur Study Planner:
           </h3>
@@ -309,7 +415,7 @@ const StudyPlanner: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Subjects */}
           <div className="space-y-6">
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                   Mata Pelajaran
@@ -323,12 +429,12 @@ const StudyPlanner: React.FC = () => {
                     placeholder="Tambah mata pelajaran baru"
                     value={newSubject.name}
                     onChange={(e) => setNewSubject(prev => ({ ...prev, name: e.target.value }))}
-                    className="flex-1 p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                    className="flex-1 p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                   />
                   <select
                     value={newSubject.priority}
                     onChange={(e) => setNewSubject(prev => ({ ...prev, priority: e.target.value as 'low' | 'medium' | 'high' }))}
-                    className="p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                   >
                     <option value="low">Rendah</option>
                     <option value="medium">Sedang</option>
@@ -336,7 +442,7 @@ const StudyPlanner: React.FC = () => {
                   </select>
                   <button 
                     onClick={addSubject}
-                    className="p-2 bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 rounded hover:bg-amber-200 dark:hover:bg-amber-800/30 transition-colors duration-200"
+                    className="p-2 bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 rounded hover:bg-amber-200 dark:hover:bg-amber-800/30 transition-colors duration-200 shadow-md shadow-amber-500/10"
                   >
                     <Plus className="w-4 h-4" />
                   </button>
@@ -344,7 +450,7 @@ const StudyPlanner: React.FC = () => {
                 
                 <div className="space-y-2 mt-4">
                   {subjects.map((subject) => (
-                    <div key={subject.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <div key={subject.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
                       <div className="flex items-center">
                         <div className="w-3 h-3 rounded-full mr-3" style={{ backgroundColor: subject.color }}></div>
                         <span className="text-gray-900 dark:text-white">{subject.name}</span>
@@ -367,7 +473,7 @@ const StudyPlanner: React.FC = () => {
             </div>
 
             {/* Study Session Form */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                 Tambah Sesi Belajar
               </h3>
@@ -380,7 +486,7 @@ const StudyPlanner: React.FC = () => {
                   <select
                     value={newSession.subjectId}
                     onChange={(e) => setNewSession(prev => ({ ...prev, subjectId: e.target.value }))}
-                    className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                   >
                     {subjects.map(subject => (
                       <option key={subject.id} value={subject.id}>{subject.name}</option>
@@ -395,7 +501,7 @@ const StudyPlanner: React.FC = () => {
                   <select
                     value={newSession.day}
                     onChange={(e) => setNewSession(prev => ({ ...prev, day: e.target.value as any }))}
-                    className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                   >
                     <option value="monday">Senin</option>
                     <option value="tuesday">Selasa</option>
@@ -416,7 +522,7 @@ const StudyPlanner: React.FC = () => {
                       type="time"
                       value={newSession.startTime}
                       onChange={(e) => setNewSession(prev => ({ ...prev, startTime: e.target.value }))}
-                      className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                     />
                   </div>
                   <div>
@@ -427,7 +533,7 @@ const StudyPlanner: React.FC = () => {
                       type="time"
                       value={newSession.endTime}
                       onChange={(e) => setNewSession(prev => ({ ...prev, endTime: e.target.value }))}
-                      className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                     />
                   </div>
                 </div>
@@ -441,24 +547,65 @@ const StudyPlanner: React.FC = () => {
                     value={newSession.target}
                     onChange={(e) => setNewSession(prev => ({ ...prev, target: e.target.value }))}
                     rows={2}
-                    className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                    className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                   />
                 </div>
                 
                 <button 
                   onClick={addStudySession}
-                  className="w-full bg-amber-600 hover:bg-amber-700 text-white py-3 px-4 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center space-x-2"
+                  className="w-full bg-amber-600 hover:bg-amber-700 text-white py-3 px-4 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center space-x-2 shadow-lg shadow-amber-500/30"
                 >
                   <Plus className="w-5 h-5" />
                   <span>Tambah ke Jadwal</span>
                 </button>
               </div>
             </div>
+
+            {/* Export & Save */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                Ekspor & Simpan
+              </h3>
+              
+              <div className="space-y-3">
+                <button 
+                  onClick={saveStudyPlan}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center space-x-2 shadow-lg shadow-blue-500/30"
+                >
+                  <Save className="w-5 h-5" />
+                  <span>Simpan Jadwal (JSON)</span>
+                </button>
+                
+                <button 
+                  onClick={exportToPDF}
+                  disabled={isExporting}
+                  className="w-full bg-amber-600 hover:bg-amber-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white py-3 px-4 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center space-x-2 shadow-lg shadow-amber-500/30"
+                >
+                  {isExporting ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                      <span>Mengekspor...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-5 h-5" />
+                      <span>Ekspor ke PDF</span>
+                    </>
+                  )}
+                </button>
+                
+                {exportSuccess && (
+                  <div className="text-center text-sm text-green-600 dark:text-green-400 mt-2 animate-fade-in">
+                    PDF berhasil diunduh!
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Right Column - Weekly Schedule */}
           <div className="lg:col-span-2">
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <div ref={scheduleRef} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                   Jadwal Mingguan
@@ -466,14 +613,14 @@ const StudyPlanner: React.FC = () => {
                 <div className="flex space-x-2">
                   <button 
                     onClick={saveStudyPlan}
-                    className="px-3 py-1 text-sm bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 rounded hover:bg-amber-200 dark:hover:bg-amber-800/30 transition-colors duration-200 flex items-center space-x-1"
+                    className="px-3 py-1 text-sm bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 rounded hover:bg-amber-200 dark:hover:bg-amber-800/30 transition-colors duration-200 flex items-center space-x-1 shadow-md shadow-amber-500/10"
                   >
                     <Save className="w-4 h-4" />
                     <span>Simpan</span>
                   </button>
                   <button 
                     onClick={exportToPDF}
-                    className="px-3 py-1 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
+                    className="px-3 py-1 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200 shadow-md"
                   >
                     Ekspor PDF
                   </button>
@@ -541,8 +688,8 @@ const StudyPlanner: React.FC = () => {
 
         {/* Features */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-12">
-          <div className="text-center">
-            <div className="w-12 h-12 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mx-auto mb-3">
+          <div className="text-center bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-200 dark:border-gray-700">
+            <div className="w-12 h-12 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg shadow-green-500/20">
               <span className="text-lg">📚</span>
             </div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Terstruktur</h3>
@@ -551,8 +698,8 @@ const StudyPlanner: React.FC = () => {
             </p>
           </div>
 
-          <div className="text-center">
-            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center mx-auto mb-3">
+          <div className="text-center bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-200 dark:border-gray-700">
+            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg shadow-blue-500/20">
               <span className="text-lg">⏱️</span>
             </div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Manajemen Waktu</h3>
@@ -561,8 +708,8 @@ const StudyPlanner: React.FC = () => {
             </p>
           </div>
 
-          <div className="text-center">
-            <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/20 rounded-full flex items-center justify-center mx-auto mb-3">
+          <div className="text-center bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-200 dark:border-gray-700">
+            <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/20 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg shadow-purple-500/20">
               <span className="text-lg">🎯</span>
             </div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Target Jelas</h3>
@@ -571,8 +718,8 @@ const StudyPlanner: React.FC = () => {
             </p>
           </div>
 
-          <div className="text-center">
-            <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/20 rounded-full flex items-center justify-center mx-auto mb-3">
+          <div className="text-center bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-200 dark:border-gray-700">
+            <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/20 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg shadow-orange-500/20">
               <span className="text-lg">📱</span>
             </div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Ekspor & Bagikan</h3>

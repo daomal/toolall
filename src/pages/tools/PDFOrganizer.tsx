@@ -26,6 +26,7 @@ const PDFOrganizer: React.FC = () => {
   const [previewPage, setPreviewPage] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loadedPdfDocument, setLoadedPdfDocument] = useState<any>(null);
+  const [selectedPages, setSelectedPages] = useState<string[]>([]);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -68,6 +69,7 @@ const PDFOrganizer: React.FC = () => {
     setNumPages(null);
     setPreviewPage(null);
     setLoadedPdfDocument(null);
+    setSelectedPages([]);
   };
 
   const onDocumentLoadSuccess = (pdfDocument: any) => {
@@ -150,8 +152,38 @@ const PDFOrganizer: React.FC = () => {
 
   const deletePage = (pageId: string) => {
     setPages(prevPages => prevPages.filter(page => page.id !== pageId));
+    setSelectedPages(prevSelected => prevSelected.filter(id => id !== pageId));
     if (previewPage !== null) {
       setPreviewPage(null);
+    }
+  };
+
+  const togglePageSelection = (pageId: string) => {
+    setSelectedPages(prevSelected => {
+      if (prevSelected.includes(pageId)) {
+        return prevSelected.filter(id => id !== pageId);
+      } else {
+        return [...prevSelected, pageId];
+      }
+    });
+  };
+
+  const selectAllPages = () => {
+    if (selectedPages.length === pages.length) {
+      // If all pages are already selected, deselect all
+      setSelectedPages([]);
+    } else {
+      // Otherwise, select all pages
+      setSelectedPages(pages.map(page => page.id));
+    }
+  };
+
+  const deleteSelectedPages = () => {
+    if (selectedPages.length === 0) return;
+    
+    if (window.confirm(`Apakah Anda yakin ingin menghapus ${selectedPages.length} halaman terpilih?`)) {
+      setPages(prevPages => prevPages.filter(page => !selectedPages.includes(page.id)));
+      setSelectedPages([]);
     }
   };
 
@@ -220,6 +252,56 @@ const PDFOrganizer: React.FC = () => {
     }
   };
 
+  const extractSelectedPages = async () => {
+    if (!pdfFile || selectedPages.length === 0) {
+      setError('Pilih halaman yang ingin diekstrak terlebih dahulu.');
+      return;
+    }
+
+    setIsProcessing(true);
+    
+    try {
+      // Load original PDF
+      const pdfBytes = await pdfFile.arrayBuffer();
+      const originalPdf = await PDFDocument.load(pdfBytes);
+      
+      // Create a new PDF document
+      const newPdf = await PDFDocument.create();
+      
+      // Get selected pages
+      const selectedPagesData = pages.filter(page => selectedPages.includes(page.id));
+      
+      // Copy selected pages in the current order
+      for (const page of selectedPagesData) {
+        const [copiedPage] = await newPdf.copyPages(originalPdf, [page.pageNumber - 1]);
+        
+        // Apply rotation if needed
+        if (page.rotation !== 0) {
+          copiedPage.setRotation(degrees(page.rotation));
+        }
+        
+        newPdf.addPage(copiedPage);
+      }
+      
+      // Save the new PDF
+      const extractedPdfBytes = await newPdf.save();
+      const blob = new Blob([extractedPdfBytes], { type: 'application/pdf' });
+      
+      // Generate a filename
+      const originalName = pdfFile.name;
+      const baseName = originalName.substring(0, originalName.lastIndexOf('.')) || originalName;
+      const newFileName = `${baseName}-extracted.pdf`;
+      
+      saveAs(blob, newFileName);
+      
+    } catch (error) {
+      console.error('Error extracting pages:', error);
+      setError('Terjadi kesalahan saat mengekstrak halaman PDF. Silakan coba lagi.');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   return (
     <div className="min-h-screen py-8">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -234,7 +316,7 @@ const PDFOrganizer: React.FC = () => {
 
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 dark:bg-blue-900/20 rounded-full mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 dark:bg-blue-900/20 rounded-full mb-4 shadow-lg shadow-blue-500/20">
             <ArrowUpDown className="w-8 h-8 text-blue-600 dark:text-blue-400" />
           </div>
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
@@ -246,7 +328,7 @@ const PDFOrganizer: React.FC = () => {
         </div>
 
         {/* Instructions */}
-        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6 mb-8">
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6 mb-8 shadow-lg shadow-blue-500/10">
           <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-3">
             Fitur Pengatur PDF:
           </h3>
@@ -254,6 +336,7 @@ const PDFOrganizer: React.FC = () => {
             <li>Ubah urutan halaman dengan drag & drop</li>
             <li>Putar halaman 90°, 180°, atau 270°</li>
             <li>Hapus halaman yang tidak diperlukan</li>
+            <li>Ekstrak halaman tertentu ke file PDF baru</li>
             <li>Preview setiap halaman sebelum menyimpan</li>
             <li>Unduh PDF yang sudah diatur ulang</li>
           </ul>
@@ -261,14 +344,14 @@ const PDFOrganizer: React.FC = () => {
 
         {/* Error Message */}
         {error && (
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6 text-red-700 dark:text-red-300">
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6 text-red-700 dark:text-red-300 shadow-lg shadow-red-500/10">
             {error}
           </div>
         )}
 
         {/* File Upload */}
         {!pdfFile && (
-          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-8 mb-6">
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-8 mb-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
             <div 
               className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-12 text-center cursor-pointer hover:border-blue-400 dark:hover:border-blue-500 transition-colors duration-200"
               onClick={() => fileInputRef.current?.click()}
@@ -280,7 +363,7 @@ const PDFOrganizer: React.FC = () => {
               <p className="text-gray-600 dark:text-gray-400 mb-6">
                 Pilih file PDF yang ingin Anda atur ulang
               </p>
-              <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200">
+              <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200 shadow-lg shadow-blue-500/30">
                 Pilih File PDF
               </button>
             </div>
@@ -299,7 +382,7 @@ const PDFOrganizer: React.FC = () => {
         {pdfFile && (
           <div className="space-y-6">
             {/* File Info */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -348,17 +431,43 @@ const PDFOrganizer: React.FC = () => {
 
             {/* Page Thumbnails */}
             {isGeneratingThumbnails ? (
-              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg">
                 <div className="flex flex-col items-center justify-center py-12">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
                   <p className="text-gray-600 dark:text-gray-400">Memuat halaman PDF...</p>
                 </div>
               </div>
             ) : pages.length > 0 ? (
-              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                  Atur Halaman ({pages.length})
-                </h3>
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    Atur Halaman ({pages.length})
+                  </h3>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={selectAllPages}
+                      className="px-3 py-1 text-sm bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded hover:bg-blue-200 dark:hover:bg-blue-800/30 transition-colors duration-200"
+                    >
+                      {selectedPages.length === pages.length ? 'Batalkan Pilihan' : 'Pilih Semua'}
+                    </button>
+                    {selectedPages.length > 0 && (
+                      <>
+                        <button
+                          onClick={extractSelectedPages}
+                          className="px-3 py-1 text-sm bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded hover:bg-green-200 dark:hover:bg-green-800/30 transition-colors duration-200"
+                        >
+                          Ekstrak {selectedPages.length} Halaman
+                        </button>
+                        <button
+                          onClick={deleteSelectedPages}
+                          className="px-3 py-1 text-sm bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-300 rounded hover:bg-red-200 dark:hover:bg-red-800/30 transition-colors duration-200"
+                        >
+                          Hapus {selectedPages.length} Halaman
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
                 
                 <DragDropContext onDragEnd={handleDragEnd}>
                   <Droppable droppableId="pages" direction="horizontal">
@@ -374,10 +483,17 @@ const PDFOrganizer: React.FC = () => {
                               <div
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
-                                className="bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden flex flex-col"
+                                className={`bg-gray-50 dark:bg-gray-700 rounded-lg border ${
+                                  selectedPages.includes(page.id) 
+                                    ? 'border-blue-500 dark:border-blue-400 shadow-lg shadow-blue-500/30' 
+                                    : 'border-gray-200 dark:border-gray-600 hover:shadow-md'
+                                } overflow-hidden flex flex-col transition-all duration-200`}
                               >
                                 {/* Thumbnail */}
-                                <div className="relative">
+                                <div 
+                                  className="relative cursor-pointer"
+                                  onClick={() => togglePageSelection(page.id)}
+                                >
                                   <div 
                                     className="aspect-[3/4] bg-white dark:bg-gray-600 flex items-center justify-center overflow-hidden"
                                     style={{ 
@@ -400,11 +516,19 @@ const PDFOrganizer: React.FC = () => {
                                   
                                   {/* Preview button */}
                                   <button
-                                    onClick={() => previewPageHandler(page.pageNumber)}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      previewPageHandler(page.pageNumber);
+                                    }}
                                     className="absolute top-2 right-2 p-1 bg-white dark:bg-gray-800 rounded-full shadow-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
                                   >
                                     <Eye className="w-4 h-4 text-gray-600 dark:text-gray-400" />
                                   </button>
+
+                                  {/* Selection indicator */}
+                                  {selectedPages.includes(page.id) && (
+                                    <div className="absolute top-0 left-0 w-full h-full bg-blue-500/10 border-2 border-blue-500 rounded-lg"></div>
+                                  )}
                                 </div>
                                 
                                 {/* Page info and controls */}
@@ -460,7 +584,7 @@ const PDFOrganizer: React.FC = () => {
                 <button
                   onClick={processPDF}
                   disabled={isProcessing || pages.length === 0}
-                  className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-8 py-3 rounded-lg font-medium transition-colors duration-200 flex items-center space-x-2 mx-auto"
+                  className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-8 py-3 rounded-lg font-medium transition-colors duration-200 flex items-center space-x-2 mx-auto shadow-lg shadow-blue-500/30"
                 >
                   {isProcessing ? (
                     <>
@@ -479,8 +603,8 @@ const PDFOrganizer: React.FC = () => {
 
             {/* Page Preview Modal */}
             {previewPage !== null && pdfFile && (
-              <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-                <div className="bg-white dark:bg-gray-800 rounded-xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+              <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+                <div className="bg-white dark:bg-gray-800 rounded-xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
                   <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                       Preview Halaman {previewPage}
@@ -525,8 +649,8 @@ const PDFOrganizer: React.FC = () => {
 
         {/* Features */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
-          <div className="text-center">
-            <div className="w-12 h-12 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mx-auto mb-3">
+          <div className="text-center bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-200 dark:border-gray-700">
+            <div className="w-12 h-12 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg shadow-green-500/20">
               <span className="text-lg">🔄</span>
             </div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Mudah Digunakan</h3>
@@ -535,8 +659,8 @@ const PDFOrganizer: React.FC = () => {
             </p>
           </div>
 
-          <div className="text-center">
-            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center mx-auto mb-3">
+          <div className="text-center bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-200 dark:border-gray-700">
+            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg shadow-blue-500/20">
               <span className="text-lg">👁️</span>
             </div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Preview Langsung</h3>
@@ -545,8 +669,8 @@ const PDFOrganizer: React.FC = () => {
             </p>
           </div>
 
-          <div className="text-center">
-            <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/20 rounded-full flex items-center justify-center mx-auto mb-3">
+          <div className="text-center bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-200 dark:border-gray-700">
+            <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/20 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg shadow-purple-500/20">
               <span className="text-lg">🔒</span>
             </div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Privasi Terjamin</h3>
