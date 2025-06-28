@@ -306,20 +306,10 @@ const ItineraryPlanner: React.FC = () => {
         pdf.text(itinerary.description, 105, 35, { align: 'center', maxWidth: 180 });
       }
       
-      let heightLeft = imgHeight;
       let position = 45; // Start position after title and description
       
       // Add image to PDF
       pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= (pageHeight - position);
-      
-      // Add new pages if needed
-      while (heightLeft > 0) {
-        position = 0;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, -pageHeight + position + imgHeight, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-      }
       
       // Save PDF
       pdf.save(`${itinerary.title.replace(/\s+/g, '_')}_itinerary.pdf`);
@@ -339,7 +329,7 @@ const ItineraryPlanner: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen py-8 bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen py-8 bg-white dark:bg-gray-900">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Back Button */}
         <Link 

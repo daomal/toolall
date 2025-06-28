@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ArrowLeft, ArrowUpDown, Upload, Download, RotateCw, RotateCcw, Trash2, Eye, X, GripVertical, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowUpDown, ArrowRight, ArrowDown, Upload, Download, RotateCw, RotateCcw, Trash2, Eye, X, GripVertical } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { PDFDocument, degrees } from 'pdf-lib';
 import { saveAs } from 'file-saver';
@@ -317,7 +317,7 @@ const PDFOrganizer: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen py-8 bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen py-8 bg-white dark:bg-gray-900">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Back Button */}
         <Link 
@@ -349,6 +349,7 @@ const PDFOrganizer: React.FC = () => {
           <ul className="list-disc list-inside space-y-1 text-blue-800 dark:text-blue-200">
             <li>Ubah urutan halaman dengan drag & drop</li>
             <li>Putar halaman 90°, 180°, atau 270°</li>
+            <li>Pindahkan halaman ke kiri atau kanan dengan tombol panah</li>
             <li>Hapus halaman yang tidak diperlukan</li>
             <li>Ekstrak halaman tertentu ke file PDF baru</li>
             <li>Preview setiap halaman sebelum menyimpan</li>

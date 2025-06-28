@@ -1,6 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, QrCode, Download, Copy, RefreshCw, Smartphone } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import QRCode from 'qrcode';
 
 const QRCodeGenerator: React.FC = () => {
   const [inputText, setInputText] = useState('');
@@ -10,10 +11,10 @@ const QRCodeGenerator: React.FC = () => {
   const [foregroundColor, setForegroundColor] = useState('#000000');
   const [backgroundColor, setBackgroundColor] = useState('#ffffff');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [copied, setCopied] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // QR Code generation menggunakan library qrcode.js yang disimulasikan
-  // Dalam implementasi nyata, Anda perlu menginstall library qrcode
+  // QR Code generation using qrcode library
   const generateQRCode = async () => {
     if (!inputText.trim()) {
       setQrDataURL('');
@@ -23,80 +24,42 @@ const QRCodeGenerator: React.FC = () => {
     setIsGenerating(true);
 
     try {
-      // Simulasi QR Code generation
-      // Dalam implementasi nyata, gunakan library seperti 'qrcode'
       const canvas = canvasRef.current;
       if (!canvas) return;
 
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-
-      canvas.width = qrSize;
-      canvas.height = qrSize;
+      // Generate QR code
+      const options = {
+        errorCorrectionLevel: errorLevel,
+        margin: 1,
+        width: qrSize,
+        color: {
+          dark: foregroundColor,
+          light: backgroundColor
+        }
+      };
 
       // Clear canvas
-      ctx.fillStyle = backgroundColor;
-      ctx.fillRect(0, 0, qrSize, qrSize);
-
-      // Simulasi QR pattern (dalam implementasi nyata, gunakan library qrcode)
-      const moduleSize = qrSize / 25; // 25x25 grid untuk simulasi
-      ctx.fillStyle = foregroundColor;
-
-      // Generate simple pattern untuk demo
-      for (let i = 0; i < 25; i++) {
-        for (let j = 0; j < 25; j++) {
-          // Simulasi QR pattern berdasarkan hash dari input text
-          const hash = simpleHash(inputText + i + j);
-          if (hash % 3 === 0) {
-            ctx.fillRect(i * moduleSize, j * moduleSize, moduleSize, moduleSize);
-          }
-        }
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
 
-      // Add finder patterns (corner squares)
-      drawFinderPattern(ctx, 0, 0, moduleSize);
-      drawFinderPattern(ctx, 18 * moduleSize, 0, moduleSize);
-      drawFinderPattern(ctx, 0, 18 * moduleSize, moduleSize);
-
+      // Generate QR code on canvas
+      await QRCode.toCanvas(canvas, inputText, options);
+      
       // Convert canvas to data URL
       const dataURL = canvas.toDataURL('image/png');
       setQrDataURL(dataURL);
 
     } catch (error) {
       console.error('Error generating QR code:', error);
-      alert('Terjadi kesalahan saat membuat QR code');
+      alert('Terjadi kesalahan saat membuat QR code.');
     } finally {
       setIsGenerating(false);
     }
   };
 
-  // Simple hash function untuk simulasi
-  const simpleHash = (str: string): number => {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
-      hash = hash & hash; // Convert to 32-bit integer
-    }
-    return Math.abs(hash);
-  };
-
-  // Draw finder pattern (corner squares)
-  const drawFinderPattern = (ctx: CanvasRenderingContext2D, x: number, y: number, moduleSize: number) => {
-    // Outer square
-    ctx.fillStyle = foregroundColor;
-    ctx.fillRect(x, y, 7 * moduleSize, 7 * moduleSize);
-    
-    // Inner white square
-    ctx.fillStyle = backgroundColor;
-    ctx.fillRect(x + moduleSize, y + moduleSize, 5 * moduleSize, 5 * moduleSize);
-    
-    // Center square
-    ctx.fillStyle = foregroundColor;
-    ctx.fillRect(x + 2 * moduleSize, y + 2 * moduleSize, 3 * moduleSize, 3 * moduleSize);
-  };
-
-  // Generate QR code saat input berubah
+  // Generate QR code when inputs change
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       generateQRCode();
@@ -104,6 +67,22 @@ const QRCodeGenerator: React.FC = () => {
 
     return () => clearTimeout(timeoutId);
   }, [inputText, qrSize, errorLevel, foregroundColor, backgroundColor]);
+
+  const copyToClipboard = async () => {
+    if (!inputText.trim()) {
+      alert('Tidak ada teks untuk disalin!');
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(inputText);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      console.error('Gagal menyalin:', error);
+      alert('Gagal menyalin teks');
+    }
+  };
 
   const downloadQRCode = () => {
     if (!qrDataURL) {
@@ -119,21 +98,6 @@ const QRCodeGenerator: React.FC = () => {
     document.body.removeChild(link);
   };
 
-  const copyToClipboard = async () => {
-    if (!inputText.trim()) {
-      alert('Tidak ada teks untuk disalin!');
-      return;
-    }
-
-    try {
-      await navigator.clipboard.writeText(inputText);
-      alert('Teks berhasil disalin ke clipboard!');
-    } catch (error) {
-      console.error('Gagal menyalin:', error);
-      alert('Gagal menyalin teks');
-    }
-  };
-
   const presetTexts = [
     { label: 'Website', value: 'https://example.com' },
     { label: 'Email', value: 'mailto:example@email.com' },
@@ -144,7 +108,7 @@ const QRCodeGenerator: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen py-8">
+    <div className="min-h-screen py-8 bg-white dark:bg-gray-900">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Back Button */}
         <Link 
@@ -186,26 +150,21 @@ const QRCodeGenerator: React.FC = () => {
           {/* Input & Settings */}
           <div className="space-y-6">
             {/* Text Input */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                 1. Data QR Code
               </h3>
               
               <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Teks atau Data
-                  </label>
-                  <textarea
-                    value={inputText}
-                    onChange={(e) => setInputText(e.target.value)}
-                    placeholder="Masukkan teks, URL, atau data lainnya..."
-                    rows={4}
-                    className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-slate-500 focus:border-transparent"
-                  />
-                  <div className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                    {inputText.length} karakter
-                  </div>
+                <textarea
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                  placeholder="Masukkan teks, URL, atau data lainnya..."
+                  rows={4}
+                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                />
+                <div className="text-sm text-gray-500 dark:text-gray-400">
+                  {inputText.length} karakter
                 </div>
 
                 <div className="flex items-center space-x-2">
@@ -214,15 +173,15 @@ const QRCodeGenerator: React.FC = () => {
                     disabled={!inputText.trim()}
                     className="flex items-center space-x-2 px-3 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 disabled:bg-gray-300 dark:disabled:bg-gray-600 disabled:cursor-not-allowed text-gray-700 dark:text-gray-300 rounded-lg transition-colors duration-200"
                   >
-                    <Copy className="w-4 h-4" />
-                    <span>Salin Teks</span>
+                    {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                    <span>{copied ? 'Tersalin!' : 'Salin Teks'}</span>
                   </button>
                 </div>
               </div>
             </div>
 
             {/* Presets */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                 2. Template Cepat
               </h3>
@@ -246,7 +205,7 @@ const QRCodeGenerator: React.FC = () => {
             </div>
 
             {/* Settings */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                 3. Pengaturan QR Code
               </h3>
@@ -334,7 +293,7 @@ const QRCodeGenerator: React.FC = () => {
           {/* Preview & Download */}
           <div className="space-y-6">
             {/* QR Code Preview */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                 Preview QR Code
               </h3>
@@ -371,7 +330,7 @@ const QRCodeGenerator: React.FC = () => {
               </div>
 
               {/* Hidden canvas for QR generation */}
-              <canvas ref={canvasRef} className="hidden" />
+              <canvas ref={canvasRef} className="hidden" width={qrSize} height={qrSize} />
 
               {/* Download Button */}
               <div className="text-center">
@@ -388,7 +347,7 @@ const QRCodeGenerator: React.FC = () => {
 
             {/* QR Info */}
             {inputText.trim() && (
-              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                   Informasi QR Code
                 </h3>
@@ -415,7 +374,7 @@ const QRCodeGenerator: React.FC = () => {
             )}
 
             {/* Usage Tips */}
-            <div className="bg-slate-50 dark:bg-slate-900/20 rounded-xl border border-slate-200 dark:border-slate-700 p-6">
+            <div className="bg-slate-50 dark:bg-slate-900/20 rounded-xl border border-slate-200 dark:border-slate-700 p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
               <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">
                 Tips Penggunaan
               </h3>
@@ -454,7 +413,7 @@ const QRCodeGenerator: React.FC = () => {
               { title: 'WiFi', desc: 'Kredensial WiFi untuk koneksi otomatis', icon: '📶', example: 'WIFI:T:WPA;S:NetworkName;P:password;;' },
               { title: 'Menu Restaurant', desc: 'Menu digital tanpa sentuh', icon: '🍽️', example: 'https://restaurant.com/menu' },
               { title: 'Event', desc: 'Informasi acara dan lokasi', icon: '🎫', example: 'https://event.com/details' },
-              { title: 'WhatsApp', desc: 'Chat langsung ke nomor WhatsApp', icon: '💬', example: 'https://wa.me/6281234567890' }
+              { title: 'WhatsApp', desc: 'Chat langsung ke nomor WhatsApp', icon: '💬', example: 'https://wa.me/6281234567890?text=Halo!' }
             ].map((useCase, index) => (
               <div key={index} className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow duration-200">
                 <div className="text-center">

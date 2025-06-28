@@ -140,7 +140,7 @@ const PDFProtect: React.FC = () => {
       const userPassword = options.userPassword;
       const ownerPassword = options.ownerPassword || options.userPassword;
       
-      // Encrypt the PDF with the correct method
+      // Set permissions
       await pdfDoc.encrypt({
         userPassword,
         ownerPassword,
@@ -176,7 +176,7 @@ const PDFProtect: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen py-8 bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen py-8 bg-white dark:bg-gray-900">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Back Button */}
         <Link 

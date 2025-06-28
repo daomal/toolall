@@ -13,10 +13,10 @@ const Navbar: React.FC = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2 group">
             <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
-              <span className="text-white font-bold text-sm">AT</span>
+              <span className="text-white font-bold text-sm">MT</span>
             </div>
             <span className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200">
-              All-in-One Tools
+              Mastur Tools
             </span>
           </Link>
 

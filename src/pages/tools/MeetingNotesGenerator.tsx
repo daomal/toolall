@@ -1,8 +1,10 @@
 import React, { useState, useRef } from 'react';
-import { ArrowLeft, FileText, Copy, Download, Plus, Trash2, Save, Check } from 'lucide-react';
+import { ArrowLeft, FileText, Copy, Download, Plus, Trash2, Save, Check, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
+import { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, BorderStyle, WidthType, AlignmentType } from 'docx';
+import { saveAs } from 'file-saver';
 
 interface Participant {
   id: string;
@@ -52,6 +54,7 @@ const MeetingNotesGenerator: React.FC = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<'simple' | 'professional' | 'corporate'>('professional');
   const [copied, setCopied] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [exportFormat, setExportFormat] = useState<'pdf' | 'docx'>('pdf');
   
   const notesRef = useRef<HTMLDivElement>(null);
 
@@ -206,20 +209,32 @@ const MeetingNotesGenerator: React.FC = () => {
       
       const pdf = new jsPDF('p', 'mm', 'a4');
       
-      let heightLeft = imgHeight;
-      let position = 0;
+      // Add title
+      pdf.setFontSize(20);
+      pdf.setTextColor(0, 0, 0);
+      pdf.text(meetingNote.title || 'Meeting Notes', 105, 15, { align: 'center' });
+      
+      // Add date and time
+      pdf.setFontSize(12);
+      pdf.setTextColor(100, 100, 100);
+      const dateTimeText = `${meetingNote.date} • ${meetingNote.startTime} - ${meetingNote.endTime}`;
+      pdf.text(dateTimeText, 105, 25, { align: 'center' });
+      
+      // Add location and facilitator
+      if (meetingNote.location || meetingNote.facilitator) {
+        const locationFacilitatorText = `${meetingNote.location}${meetingNote.location && meetingNote.facilitator ? ' • ' : ''}${meetingNote.facilitator ? `Facilitator: ${meetingNote.facilitator}` : ''}`;
+        pdf.text(locationFacilitatorText, 105, 32, { align: 'center' });
+      }
+      
+      // Add a decorative line
+      pdf.setDrawColor(41, 128, 185); // Blue color
+      pdf.setLineWidth(0.5);
+      pdf.line(20, 38, 190, 38);
+      
+      let position = 45; // Start position after title and header
       
       // Add image to PDF
       pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-      
-      // Add new pages if needed
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-      }
       
       // Save PDF
       pdf.save(`${meetingNote.title || 'meeting-notes'}.pdf`);
@@ -232,9 +247,295 @@ const MeetingNotesGenerator: React.FC = () => {
     }
   };
 
-  // Export to Word (simulated)
-  const exportToWord = () => {
-    alert('Export to Word functionality would be implemented here. For now, please use the Copy to Clipboard feature and paste into Word.');
+  // Export to Word (DOCX)
+  const exportToWord = async () => {
+    setIsExporting(true);
+    
+    try {
+      // Create a new document
+      const doc = new Document({
+        styles: {
+          paragraphStyles: [
+            {
+              id: "Heading1",
+              name: "Heading 1",
+              basedOn: "Normal",
+              next: "Normal",
+              quickFormat: true,
+              run: {
+                size: 36, // 18pt
+                bold: true,
+                color: "2B579A", // Blue
+              },
+              paragraph: {
+                spacing: {
+                  after: 240, // 12pt
+                },
+              },
+            },
+            {
+              id: "Heading2",
+              name: "Heading 2",
+              basedOn: "Normal",
+              next: "Normal",
+              quickFormat: true,
+              run: {
+                size: 28, // 14pt
+                bold: true,
+                color: "2B579A", // Blue
+              },
+              paragraph: {
+                spacing: {
+                  before: 240, // 12pt
+                  after: 120, // 6pt
+                },
+              },
+            },
+            {
+              id: "Normal",
+              name: "Normal",
+              next: "Normal",
+              run: {
+                size: 24, // 12pt
+              },
+              paragraph: {
+                spacing: {
+                  line: 276, // 1.15
+                },
+              },
+            },
+          ],
+        },
+        sections: [
+          {
+            properties: {},
+            children: [
+              // Title
+              new Paragraph({
+                text: meetingNote.title || "Meeting Notes",
+                heading: HeadingLevel.HEADING_1,
+                alignment: AlignmentType.CENTER,
+              }),
+              
+              // Meeting Info
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: `Date: ${meetingNote.date}`,
+                    bold: true,
+                  }),
+                ],
+              }),
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: `Time: ${meetingNote.startTime} - ${meetingNote.endTime}`,
+                    bold: true,
+                  }),
+                ],
+              }),
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: `Location: ${meetingNote.location}`,
+                    bold: true,
+                  }),
+                ],
+              }),
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: `Facilitator: ${meetingNote.facilitator}`,
+                    bold: true,
+                  }),
+                ],
+                spacing: {
+                  after: 240, // 12pt
+                },
+              }),
+              
+              // Participants
+              new Paragraph({
+                text: "Participants",
+                heading: HeadingLevel.HEADING_2,
+              }),
+              ...meetingNote.participants.map(
+                (participant) =>
+                  new Paragraph({
+                    children: [
+                      new TextRun("• "),
+                      new TextRun({
+                        text: participant.name,
+                      }),
+                      new TextRun({
+                        text: participant.role ? ` (${participant.role})` : "",
+                        italics: true,
+                      }),
+                    ],
+                  })
+              ),
+              new Paragraph({ text: "" }),
+              
+              // Agenda
+              new Paragraph({
+                text: "Agenda",
+                heading: HeadingLevel.HEADING_2,
+              }),
+              ...meetingNote.agenda
+                .filter((item) => item.trim())
+                .map(
+                  (item, index) =>
+                    new Paragraph({
+                      children: [
+                        new TextRun(`${index + 1}. `),
+                        new TextRun({
+                          text: item,
+                        }),
+                      ],
+                    })
+                ),
+              new Paragraph({ text: "" }),
+              
+              // Meeting Notes
+              new Paragraph({
+                text: "Meeting Notes",
+                heading: HeadingLevel.HEADING_2,
+              }),
+              new Paragraph({
+                text: meetingNote.notes,
+              }),
+              new Paragraph({ text: "" }),
+              
+              // Decisions
+              new Paragraph({
+                text: "Decisions Made",
+                heading: HeadingLevel.HEADING_2,
+              }),
+              ...meetingNote.decisions
+                .filter((decision) => decision.trim())
+                .map(
+                  (decision, index) =>
+                    new Paragraph({
+                      children: [
+                        new TextRun(`${index + 1}. `),
+                        new TextRun({
+                          text: decision,
+                        }),
+                      ],
+                    })
+                ),
+              new Paragraph({ text: "" }),
+              
+              // Action Items
+              new Paragraph({
+                text: "Action Items",
+                heading: HeadingLevel.HEADING_2,
+              }),
+            ],
+          },
+        ],
+      });
+      
+      // Add action items table
+      const actionItems = meetingNote.actionItems.filter(item => item.description.trim());
+      if (actionItems.length > 0) {
+        const table = new Table({
+          width: {
+            size: 100,
+            type: WidthType.PERCENTAGE,
+          },
+          borders: {
+            top: {
+              style: BorderStyle.SINGLE,
+              size: 1,
+              color: "CCCCCC",
+            },
+            bottom: {
+              style: BorderStyle.SINGLE,
+              size: 1,
+              color: "CCCCCC",
+            },
+            left: {
+              style: BorderStyle.SINGLE,
+              size: 1,
+              color: "CCCCCC",
+            },
+            right: {
+              style: BorderStyle.SINGLE,
+              size: 1,
+              color: "CCCCCC",
+            },
+            insideHorizontal: {
+              style: BorderStyle.SINGLE,
+              size: 1,
+              color: "CCCCCC",
+            },
+            insideVertical: {
+              style: BorderStyle.SINGLE,
+              size: 1,
+              color: "CCCCCC",
+            },
+          },
+          rows: [
+            // Header row
+            new TableRow({
+              children: [
+                new TableCell({
+                  children: [new Paragraph({ text: "Action Item", bold: true })],
+                  shading: {
+                    fill: "F2F2F2",
+                  },
+                }),
+                new TableCell({
+                  children: [new Paragraph({ text: "Assignee", bold: true })],
+                  shading: {
+                    fill: "F2F2F2",
+                  },
+                }),
+                new TableCell({
+                  children: [new Paragraph({ text: "Due Date", bold: true })],
+                  shading: {
+                    fill: "F2F2F2",
+                  },
+                }),
+              ],
+            }),
+            // Data rows
+            ...actionItems.map(
+              (item) =>
+                new TableRow({
+                  children: [
+                    new TableCell({
+                      children: [new Paragraph(item.description)],
+                    }),
+                    new TableCell({
+                      children: [new Paragraph(item.assignee || "")],
+                    }),
+                    new TableCell({
+                      children: [new Paragraph(item.dueDate || "")],
+                    }),
+                  ],
+                })
+            ),
+          ],
+        });
+        
+        doc.addSection({
+          children: [table],
+        });
+      }
+      
+      // Generate and save document
+      Packer.toBlob(doc).then(blob => {
+        saveAs(blob, `${meetingNote.title || 'meeting-notes'}.docx`);
+      });
+      
+    } catch (error) {
+      console.error('Error exporting to Word:', error);
+      alert('Error exporting to Word. Please try again.');
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   // Get template class
@@ -252,7 +553,7 @@ const MeetingNotesGenerator: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen py-8 bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen py-8 bg-white dark:bg-gray-900">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Back Button */}
         <Link 
@@ -285,7 +586,7 @@ const MeetingNotesGenerator: React.FC = () => {
             <li>Buat notulen rapat dengan format profesional</li>
             <li>Tambahkan peserta, agenda, dan action items</li>
             <li>Pilih template yang sesuai dengan kebutuhan</li>
-            <li>Ekspor ke PDF atau salin ke clipboard</li>
+            <li>Ekspor ke PDF atau Word untuk dibagikan</li>
             <li>Simpan dan bagikan notulen dengan mudah</li>
           </ul>
         </div>
@@ -832,7 +1133,30 @@ const MeetingNotesGenerator: React.FC = () => {
                 Ekspor & Bagikan
               </h3>
               
-              <div className="space-y-3">
+              <div className="space-y-4">
+                <div className="flex space-x-4 mb-4">
+                  <button
+                    onClick={() => setExportFormat('pdf')}
+                    className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors duration-200 ${
+                      exportFormat === 'pdf'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                    }`}
+                  >
+                    PDF
+                  </button>
+                  <button
+                    onClick={() => setExportFormat('docx')}
+                    className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors duration-200 ${
+                      exportFormat === 'docx'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                    }`}
+                  >
+                    Word (DOCX)
+                  </button>
+                </div>
+                
                 <button 
                   onClick={copyToClipboard}
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center space-x-2 shadow-lg shadow-blue-500/30"
@@ -842,7 +1166,7 @@ const MeetingNotesGenerator: React.FC = () => {
                 </button>
                 
                 <button 
-                  onClick={exportToPDF}
+                  onClick={exportFormat === 'pdf' ? exportToPDF : exportToWord}
                   disabled={isExporting}
                   className="w-full bg-red-600 hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white py-3 px-4 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center space-x-2 shadow-lg shadow-red-500/30"
                 >
@@ -854,17 +1178,9 @@ const MeetingNotesGenerator: React.FC = () => {
                   ) : (
                     <>
                       <Download className="w-5 h-5" />
-                      <span>Ekspor ke PDF</span>
+                      <span>Ekspor ke {exportFormat === 'pdf' ? 'PDF' : 'Word'}</span>
                     </>
                   )}
-                </button>
-                
-                <button 
-                  onClick={exportToWord}
-                  className="w-full bg-blue-100 dark:bg-blue-900/20 hover:bg-blue-200 dark:hover:bg-blue-800/30 text-blue-700 dark:text-blue-300 py-3 px-4 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center space-x-2 shadow-md shadow-blue-500/10"
-                >
-                  <Save className="w-5 h-5" />
-                  <span>Ekspor ke Word</span>
                 </button>
               </div>
             </div>
